@@ -234,57 +234,46 @@ def on_error(error):
 def on_end():
     log.info(f"Scraping finalizado. {len(scraped_jobs)} ofertas recogidas.")
 
+import requests
+import re
+import time
+from box import Box # Si no tienes box, usa diccionarios normales
+
 def scrape_linkedin_jobs() -> list:
-    """Lanza el scraper y devuelve la lista de ofertas."""
-    li_at_cookie = os.environ.get("LI_AT_COOKIE") 
-
-    # 1. Configuramos el scraper SIN parámetros extraños en el constructor
-    scraper = LinkedinScraper(
-        #chrome_executable_path=None, 
-        headless=True,
-        max_workers=1,
-        slow_mo=5,
-        page_load_timeout=40
-    )
-
-    scraper.on(Events.DATA, on_data)
-    scraper.on(Events.ERROR, on_error)
-    scraper.on(Events.END, on_end)
-
-    # 2. Definimos las queries (asegúrate de que TimeFilters.WEEK esté aquí)
-    queries = [
-        Query(
-            query=q,
-            options=QueryOptions(
-                locations=["Madrid, España"],
-                apply_link=True,
-                limit=15,
-                filters=QueryFilters(
-                    relevance=RelevanceFilters.RECENT,
-                    time=TimeFilters.WEEK, 
-                    type=[TypeFilters.FULL_TIME, TypeFilters.CONTRACT],
-                )
-            )
-        )
-        for q in SEARCH_QUERIES
-    ]
-
-    # 3. EJECUCIÓN: Si 'li_at' falla en el run, lo lanzamos SIN ella.
-    # Es mejor capturar ofertas públicas que no capturar nada.
-    try:
-        if li_at_cookie:
-            log.info("Intentando scraping autenticado...")
-            scraper.run(queries, li_at=li_at_cookie)
-        else:
-            log.info("No hay cookie, intentando scraping público...")
-            scraper.run(queries)
-    except TypeError:
-        log.warning("La librería rechazó el parámetro li_at. Reintentando modo público...")
-        scraper.run(queries) # Reintento sin la cookie para que no falle el job
-    except Exception as e:
-        log.error(f"Error crítico en scraper: {e}")
+    """Busca ofertas usando peticiones HTTP directas (sin navegador)."""
+    all_jobs = []
     
-    return scraped_jobs
+    # Headers para parecer un navegador real
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept-Language": "es-ES,es;q=0.9",
+    }
+
+    for query in SEARCH_QUERIES:
+        log.info(f"Buscando: {query}...")
+        # URL del buscador público de LinkedIn
+        url = f"https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords={query}&location=Madrid%2C%20España&f_TPR=r604800"
+        
+        try:
+            res = requests.get(url, headers=headers, timeout=15)
+            # Extraemos IDs de ofertas con Regex
+            job_ids = re.findall(r'jobPostingCardApiHandle\" data-id=\"(\d+)\"', res.text)
+            
+            for j_id in job_ids[:10]: # Limitamos a las 10 primeras por query
+                all_jobs.append({
+                    'id': j_id,
+                    'title': "Ver en LinkedIn", # El buscador público es limitado
+                    'company': "Empresa en LinkedIn",
+                    'link': f"https://www.linkedin.com/jobs/view/{j_id}/",
+                    'description': "Consultar descripción en el link." 
+                })
+            
+            time.sleep(2) # Pausa para no ser bloqueados
+        except Exception as e:
+            log.error(f"Error buscando {query}: {e}")
+
+    log.info(f"Total de ofertas encontradas: {len(all_jobs)}")
+    return all_jobs
 # ──────────────────────────────────────────────
 # EMAIL HTML
 # ──────────────────────────────────────────────
