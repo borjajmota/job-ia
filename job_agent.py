@@ -21,7 +21,8 @@ from linkedin_jobs_scraper import LinkedinScraper
 from linkedin_jobs_scraper.events import Events, EventData, EventMetrics
 from linkedin_jobs_scraper.filters import RelevanceFilters, TimeFilters, TypeFilters
 from linkedin_jobs_scraper.query import Query, QueryOptions, QueryFilters
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 
 # ──────────────────────────────────────────────
 # CONFIG
@@ -176,26 +177,31 @@ Criterios de scoring (1-10):
 """
 
 def analyze_job_with_ai(profile: dict, job: dict) -> dict:
-    """Llama a Gemini y devuelve el análisis estructurado."""
-    genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel("gemini-1.5-flash")
-
+    """Llama a Gemini 1.5 Flash usando el nuevo SDK de 2026."""
+    # 1. Inicializar el cliente
+    client = genai.Client(api_key=GEMINI_API_KEY)
+    
     prompt = build_analysis_prompt(profile, job)
 
     try:
-        response = model.generate_content(
-            prompt,
-            generation_config=genai.types.GenerationConfig(
+        # 2. Generar contenido (nueva sintaxis)
+        response = client.models.generate_content(
+            model="gemini-1.5-flash",
+            contents=prompt,
+            config=types.GenerateContentConfig(
                 temperature=0.2,
                 max_output_tokens=500,
             )
         )
+        
         raw = response.text.strip()
-        # Limpia posibles markdown fences
+        
+        # Limpieza de markdown
         raw = re.sub(r"^```json\s*", "", raw)
         raw = re.sub(r"\s*```$", "", raw)
-        result = json.loads(raw)
-        return result
+        
+        return json.loads(raw)
+        
     except Exception as e:
         log.error(f"Error en Gemini para '{job['title']}': {e}")
         return {
