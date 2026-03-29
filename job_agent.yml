@@ -3,7 +3,8 @@ name: Job Agent — Daily Run
 on:
   schedule:
     # Lunes a viernes a las 08:00 UTC (10:00 Madrid hora verano / 09:00 invierno)
-    - cron: '0 8 * * 1-5'
+    #- cron: '0 8 * * 1-5'
+    - cron: '0 7 * * *'     # 07:00 UTC todos los días
 
   # Permite ejecutarlo manualmente desde la UI de GitHub Actions
   workflow_dispatch:
