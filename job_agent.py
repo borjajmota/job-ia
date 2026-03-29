@@ -240,7 +240,7 @@ def scrape_linkedin_jobs() -> list:
 
     # 1. Configuramos el scraper SIN parámetros extraños en el constructor
     scraper = LinkedinScraper(
-        chrome_executable_path=None, 
+        #chrome_executable_path=None, 
         headless=True,
         max_workers=1,
         slow_mo=5,
