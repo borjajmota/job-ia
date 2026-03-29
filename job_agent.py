@@ -1,214 +1,94 @@
-#!/usr/bin/env python3
-import os
-import json
-import re
-import smtplib
-import yaml
-import logging
-import time
-import random
-from datetime import datetime
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from pathlib import Path
-
-import requests
-from google import genai
-
-# --- CONFIGURACIÓN ---
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
-log = logging.getLogger(__name__)
-
-BASE_DIR        = Path(__file__).parent
-PROFILE_PATH    = BASE_DIR / "profile.yaml"
-SEEN_JOBS_PATH  = BASE_DIR / "seen_jobs.txt"
-QUEUE_PATH      = BASE_DIR / "application_queue.json"
-
-GEMINI_API_KEY  = os.environ.get("GEMINI_API_KEY")
-GMAIL_USER      = os.environ.get("GMAIL_USER")
-GMAIL_APP_PASS  = os.environ.get("GMAIL_APP_PASSWORD")
-EMAIL_TO        = os.environ.get("EMAIL_TO", GMAIL_USER)
-
-# Queries del usuario
-SEARCH_QUERIES = [
-    "Data AI Cloud", "Data Platform Analytics", "Inteligencia Artificial Machine Learning",
-    "Solutions Architect Cloud", "Program Manager Technology", "Head of Data Engineering", "AI Innovation Lead"
-]
-
-# --- PRE-FILTROS DEL USUARIO ---
-HARD_DISCARD_PATTERNS = [
-    r"\b(enfermer[ao]|médic[ao]|farmacéutic[ao]|abogad[ao]|juríd|notaría)\b",
-    r"\b(camarero|cocinero|hostelería|restaurante|hotel|recepcionista)\b",
-    r"\b(administrativ[ao] contable|auxiliar administrativ)\b",
-    r"\b(conductor|repartidor|almacén|operario|carretillero)\b",
-    r"\b(profesor de (inglés|matemáticas|primaria|secundaria))\b",
-    r"\b(comercial de seguros|agente comercial)\b",
-    r"\b(fontanero|electricista|albañil|carpintero)\b",
-    r"\bjunior developer\b", r"\bgraduate scheme\b", r"\binternship\b", r"\bprácticas\b",
-]
-
-REQUIRED_SIGNAL_PATTERNS = [
-    r"\b(data|datos|dato)\b", r"\b(cloud|nube)\b", r"\b(ia|ai|machine learning|ml|llm|analytics|analítica)\b",
-    r"\b(architect|arquitecto|arquitectura)\b", r"\b(program manager|project manager|delivery|product manager|product owner)\b",
-    r"\b(engineering manager|head of|director de)\b", r"\b(databricks|snowflake|azure|gcp|aws)\b",
-    r"\b(bi|business intelligence|power bi|tableau)\b", r"\b(plataforma de datos|data platform|data strategy|estrategia de datos)\b",
-]
-
-def pre_filter(title: str) -> bool:
-    text = title.lower()
-    for pattern in HARD_DISCARD_PATTERNS:
-        if re.search(pattern, text, re.IGNORECASE): return False
-    for pattern in REQUIRED_SIGNAL_PATTERNS:
-        if re.search(pattern, text, re.IGNORECASE): return True
-    return False
-
-# --- GESTIÓN DE DATOS ---
-def load_profile():
-    with open(PROFILE_PATH, "r", encoding="utf-8") as f: return yaml.safe_load(f)
-
-def load_seen_jobs():
-    if SEEN_JOBS_PATH.exists(): return set(SEEN_JOBS_PATH.read_text().splitlines())
-    return set()
-
-def save_seen_jobs(seen):
-    SEEN_JOBS_PATH.write_text("\n".join(sorted(seen)))
-
-def load_queue():
-    if QUEUE_PATH.exists(): return json.loads(QUEUE_PATH.read_text())
-    return []
-
-def save_queue(queue):
-    QUEUE_PATH.write_text(json.dumps(queue, ensure_ascii=False, indent=2))
-
-# --- MOTOR DE SCRAPING (BYPASS GOOGLEBOT) ---
 def scrape_linkedin_jobs():
-    """Bypass de seguridad usando spoofing de Googlebot."""
+    """
+    Atacamos el endpoint de carga dinámica (seeMoreJobPostings).
+    Es mucho más ligero y menos propenso a devolver 0 resultados.
+    """
     jobs_found = []
-    headers = {
-        "User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "X-Forwarded-For": f"66.249.{random.randint(64, 79)}.{random.randint(1, 255)}"
-    }
+    # Rotamos User-Agents de 2026
+    user_agents = [
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+    ]
 
     for query in SEARCH_QUERIES:
-        log.info(f"🕵️ Scrapeando: {query}...")
-        url = f"https://www.linkedin.com/jobs/search?keywords={query.replace(' ', '%20')}&location=Madrid%2C%20España&f_TPR=r604800"
+        log.info(f"🕵️ Buscando via API Oculta: {query}...")
+        
+        # Endpoint de 'Invitados' que suele saltarse el muro de login
+        # start=0 es la primera página, podemos subirlo para más resultados
+        url = f"https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings?keywords={query.replace(' ', '%20')}&location=Madrid%2C%20España&f_TPR=r604800&start=0"
         
         try:
+            headers = {"User-Agent": random.choice(user_agents)}
             res = requests.get(url, headers=headers, timeout=20)
+            
             if res.status_code == 200:
-                # Extraemos IDs de las URLs de vista
-                ids = re.findall(r'/view/(\d+)', res.text)
-                for j_id in set(ids):
+                # Buscamos el patrón data-entity-urn="urn:li:jobPosting:4181953086"
+                ids = re.findall(r'jobPosting:(\d+)', res.text)
+                
+                # Si no encuentra por URN, buscamos por el link directo
+                if not ids:
+                    ids = re.findall(r'/view/(\d+)', res.text)
+
+                unique_ids = list(set(ids))
+                for j_id in unique_ids:
                     jobs_found.append({
                         "job_id": j_id,
-                        "title": f"Oferta {j_id}", # El título real se sacará en el análisis si es posible
+                        "title": "Analizando...", # Se sacará en el paso de IA
                         "link": f"https://www.linkedin.com/jobs/view/{j_id}/"
                     })
-                log.info(f"  ✅ {len(set(ids))} IDs encontrados.")
-            time.sleep(random.uniform(2, 4))
+                log.info(f"  ✅ {len(unique_ids)} IDs potenciales encontrados.")
+            else:
+                log.warning(f"  ⚠️ Error {res.status_code} en query {query}")
+                
+            time.sleep(random.uniform(3, 6)) # Delay humano para evitar el baneo de IP
+            
         except Exception as e:
-            log.error(f"Error en {query}: {e}")
+            log.error(f"❌ Fallo en scraping: {e}")
             
     return jobs_found
 
-# --- ANÁLISIS IA ---
-def analyze_job_with_ai(profile, job_link):
-    """Analiza con Gemini 2.0 Flash (Bypass 404)."""
-    client = genai.Client(api_key=GEMINI_API_KEY)
-    profile_str = yaml.dump(profile, allow_unicode=True)
-    
-    prompt = f"""
-    Analiza esta oferta: {job_link}
-    Perfil de Borja: {profile_str}
-    
-    Instrucciones: Clasifica en VÁLIDA, VÁLIDA_CON_MATICES o DESCARTAR. 
-    Responde estrictamente en JSON:
-    {{
-      "classification": "VÁLIDA",
-      "score": 9,
-      "match_summary": "frase corta",
-      "gaps": "solo si hay matices",
-      "discard_reason": "solo si descartas",
-      "real_title": "Título real que leas en la web"
-    }}
-    """
-    try:
-        response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
-        clean_json = re.search(r'\{.*\}', response.text, re.DOTALL).group()
-        return json.loads(clean_json)
-    except Exception as e:
-        log.error(f"IA Error: {e}")
-        return None
-
-# --- EMAIL HTML (TU DISEÑO ORIGINAL) ---
+# --- FUNCIÓN DE EMAIL COMPLETA (TU DISEÑO ORIGINAL) ---
 def build_email_html(valid, with_caveats, date_str):
-    # (Se mantiene tu función build_email_html idéntica, omitida aquí por brevedad pero incluida en el proceso real)
-    # [AQUÍ VA TU CÓDIGO DE build_email_html QUE YA TIENES]
-    pass # ... (Implementado igual que en tu archivo original)
+    """Genera el cuerpo HTML del email de informe conservando tu estilo."""
 
-def send_email(html_body, date_str, n_valid, n_caveats):
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = f"[Empleos] {n_valid} válidas, {n_caveats} con matices — {date_str}"
-    msg["From"], msg["To"] = GMAIL_USER, EMAIL_TO
-    msg.attach(MIMEText(html_body, "html"))
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-        server.login(GMAIL_USER, GMAIL_APP_PASS)
-        server.send_message(msg)
-
-# --- MAIN ---
-def main():
-    today = datetime.now().strftime("%d/%m/%Y")
-    log.info(f"=== Agente arrancando (Versión HTTP/2026) — {today} ===")
-    
-    profile, seen_jobs, queue = load_profile(), load_seen_jobs(), load_queue()
-    raw_jobs = scrape_linkedin_jobs()
-    
-    new_jobs = [j for j in raw_jobs if j["job_id"] not in seen_jobs]
-    log.info(f"Procesando {len(new_jobs)} nuevas ofertas...")
-
-    valid, with_caveats = [], []
-    
-    for job in new_jobs[:15]: # Limitamos por ejecución para evitar bloqueos
-        analysis = analyze_job_with_ai(profile, job['link'])
-        if not analysis: continue
+    def job_card(j, idx, is_caveat=False):
+        color = "#f59e0b" if is_caveat else "#22c55e"
+        bg = "#fffbeb" if is_caveat else "#f0fdf4"
+        badge = "CON MATICES" if is_caveat else "VÁLIDA"
         
-        job.update({
-            "title": analysis.get("real_title", job["title"]),
-            "analysis": analysis,
-            "company": "Ver en Link"
-        })
+        return f"""
+        <div style="border-left:4px solid {color};padding:14px 18px;margin-bottom:16px;background:{bg};border-radius:0 8px 8px 0;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+            <span style="background:{color};color:white;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;">#{idx} {badge}</span>
+            <span style="background:white;color:{color};border:1px solid {color};font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;">Score: {j['analysis']['score']}/10</span>
+          </div>
+          <div style="font-size:17px;font-weight:600;color:#111;margin:6px 0 2px;">{j['title']}</div>
+          <div style="font-size:13px;color:#333;margin-bottom:12px;">{j['analysis']['match_summary']}</div>
+          {"<div style='font-size:12px;color:#92400e;background:#fef9c3;padding:8px 12px;border-radius:6px;margin-bottom:12px;'><strong>Gaps:</strong> "+j['analysis']['gaps']+"</div>" if is_caveat else ""}
+          <a href="{j['link']}" style="display:inline-block;background:{color};color:white;text-decoration:none;padding:7px 18px;border-radius:6px;font-size:13px;font-weight:600;">Aplicar en LinkedIn →</a>
+        </div>"""
 
-        if not pre_filter(job["title"]): 
-            seen_jobs.add(job["job_id"])
-            continue
+    valid_cards = "".join(job_card(j, i+1) for i, j in enumerate(valid))
+    caveat_cards = "".join(job_card(j, i+1, True) for i, j in enumerate(with_caveats))
 
-        clf = analysis.get("classification")
-        if clf == "VÁLIDA": valid.append(job)
-        elif clf == "VÁLIDA_CON_MATICES": with_caveats.append(job)
-        
-        seen_jobs.add(job["job_id"])
-        
-        # Actualizar cola persistente
-        queue.append({
-            "date_found": datetime.now().strftime("%Y-%m-%d"),
-            "applied": False,
-            "classification": clf,
-            "score": analysis.get("score", 0),
-            "title": job["title"],
-            "link": job["link"],
-            "match_summary": analysis.get("match_summary")
-        })
-        time.sleep(2)
-
-    save_seen_jobs(seen_jobs)
-    save_queue(queue)
-
-    if valid or with_caveats:
-        # Aquí llamarías a tu función build_email_html completa
-        # html = build_email_html(valid, with_caveats, today)
-        # send_email(html, today, len(valid), len(with_caveats))
-        log.info(f"Éxito: {len(valid)} válidas encontradas.")
-
-if __name__ == "__main__":
-    main()
+    return f"""
+<!DOCTYPE html>
+<html>
+<body style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#f9fafb;">
+  <div style="background:white;border-radius:12px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+    <h1 style="font-size:20px;color:#111;border-bottom:1px solid #eee;padding-bottom:12px;">🚀 Informe de Empleo - {date_str}</h1>
+    <p style="font-size:14px;color:#666;">Hemos analizado las últimas ofertas en Madrid para tu perfil.</p>
+    
+    <h2 style="font-size:16px;color:#166534;margin-top:24px;">✅ Ofertas Válidas ({len(valid)})</h2>
+    {valid_cards if valid_cards else '<p style="color:#888;">No se han encontrado matches directos hoy.</p>'}
+    
+    <h2 style="font-size:16px;color:#92400e;margin-top:24px;">⚠️ Con Matices ({len(with_caveats)})</h2>
+    {caveat_cards if caveat_cards else '<p style="color:#888;">No hay ofertas con matices.</p>'}
+    
+    <div style="margin-top:30px;font-size:11px;color:#aaa;text-align:center;border-top:1px solid #eee;padding-top:12px;">
+      Generado por Borja's AI Agent 2026.
+    </div>
+  </div>
+</body>
+</html>"""
