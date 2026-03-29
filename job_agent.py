@@ -112,12 +112,22 @@ def analyze_job_with_ia(profile, job_link):
       "gaps": "si hay"
     }}
     """
-    try:
-        response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
-        clean_json = re.search(r'\{.*\}', response.text, re.DOTALL).group()
-        return json.loads(clean_json)
-    except:
-        return None
+    
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
+            clean_json = re.search(r'\{.*\}', response.text, re.DOTALL).group()
+            return json.loads(clean_json)
+        except Exception as e:
+            if "429" in str(e):
+                wait_time = 20 * (attempt + 1)
+                log.warning(f"⚠️ Rate limit (429). Esperando {wait_time}s para reintentar...")
+                time.sleep(wait_time)
+            else:
+                log.error(f"❌ Error IA: {e}")
+                break
+    return None
 
 # --- EMAIL (CONSERVANDO TU ESTILO) ---
 def build_email_html(valid, caveats, date):
@@ -168,7 +178,7 @@ def main():
             })
         
         seen_jobs.add(job["job_id"])
-        time.sleep(2)
+        time.sleep(10)
 
     save_seen_jobs(seen_jobs)
     save_queue(queue)
