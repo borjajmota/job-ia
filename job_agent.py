@@ -263,8 +263,13 @@ def scrape_linkedin_jobs() -> list:
         for q in SEARCH_QUERIES
     ]
 
-    # PASAMOS LA COOKIE AQUÍ
-    scraper.run(queries, li_at=li_at_cookie) 
+    # PASAMOS LA COOKIE AQUÍ   y le meto un TRY por si ha detectado que la IP de GitHub es un bot y ha invalidado la cookie.
+    try:
+        scraper.run(queries, li_at=li_at_cookie)
+    except Exception as e:
+        log.error(f"Error durante el scraping (posible bloqueo de cookie): {e}")
+        # No lanzamos el error, dejamos que el script siga con lo que haya capturado
+    
     return scraped_jobs
 # ──────────────────────────────────────────────
 # EMAIL HTML
