@@ -238,7 +238,7 @@ def scrape_linkedin_jobs() -> list:
     """Lanza el scraper y devuelve la lista de ofertas."""
     li_at_cookie = os.environ.get("LI_AT_COOKIE") 
 
-    # 1. Creamos el scraper sin la cookie en el constructor para evitar el TypeError
+    # 1. Configuramos el scraper SIN parámetros extraños en el constructor
     scraper = LinkedinScraper(
         chrome_executable_path=None, 
         headless=True,
@@ -251,7 +251,7 @@ def scrape_linkedin_jobs() -> list:
     scraper.on(Events.ERROR, on_error)
     scraper.on(Events.END, on_end)
 
-    # 2. Definimos las queries
+    # 2. Definimos las queries (asegúrate de que TimeFilters.WEEK esté aquí)
     queries = [
         Query(
             query=q,
@@ -261,7 +261,7 @@ def scrape_linkedin_jobs() -> list:
                 limit=15,
                 filters=QueryFilters(
                     relevance=RelevanceFilters.RECENT,
-                    time=TimeFilters.DAY, # Mantén WEEK para asegurar resultados en el test
+                    time=TimeFilters.WEEK, 
                     type=[TypeFilters.FULL_TIME, TypeFilters.CONTRACT],
                 )
             )
@@ -269,11 +269,20 @@ def scrape_linkedin_jobs() -> list:
         for q in SEARCH_QUERIES
     ]
 
-    # 3. PASAMOS LA COOKIE AQUÍ (Esta es la forma correcta para esta librería)
+    # 3. EJECUCIÓN: Si 'li_at' falla en el run, lo lanzamos SIN ella.
+    # Es mejor capturar ofertas públicas que no capturar nada.
     try:
-        scraper.run(queries, li_at=li_at_cookie) 
+        if li_at_cookie:
+            log.info("Intentando scraping autenticado...")
+            scraper.run(queries, li_at=li_at_cookie)
+        else:
+            log.info("No hay cookie, intentando scraping público...")
+            scraper.run(queries)
+    except TypeError:
+        log.warning("La librería rechazó el parámetro li_at. Reintentando modo público...")
+        scraper.run(queries) # Reintento sin la cookie para que no falle el job
     except Exception as e:
-        log.error(f"Error durante el scraping: {e}")
+        log.error(f"Error crítico en scraper: {e}")
     
     return scraped_jobs
 # ──────────────────────────────────────────────
