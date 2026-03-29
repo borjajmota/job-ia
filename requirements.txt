@@ -1,8 +1,4 @@
-linkedin-jobs-scraper==2.1.1
 google-genai>=1.0.0
 PyYAML>=6.0.1
 requests>=2.31.0
 python-dotenv>=1.0.0
-# Forzamos las versiones compatibles con Selenium 3.141
-urllib3==1.26.15
-selenium==3.141.0
