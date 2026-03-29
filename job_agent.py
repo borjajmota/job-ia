@@ -230,24 +230,22 @@ def on_end():
 
 def scrape_linkedin_jobs() -> list:
     """Lanza el scraper y devuelve la lista de ofertas."""
-    
-    # Leemos la cookie del Secret de GitHub
     li_at_cookie = os.environ.get("LI_AT_COOKIE") 
 
-    # IMPORTANTE: La cookie se pasa AQUÍ en el constructor, no en el .run()
+    # 1. Creamos el scraper sin la cookie en el constructor para evitar el TypeError
     scraper = LinkedinScraper(
         chrome_executable_path=None, 
         headless=True,
         max_workers=1,
         slow_mo=5,
-        page_load_timeout=40,
-        li_at=li_at_cookie  # <--- SE PONE AQUÍ
+        page_load_timeout=40
     )
 
     scraper.on(Events.DATA, on_data)
     scraper.on(Events.ERROR, on_error)
     scraper.on(Events.END, on_end)
 
+    # 2. Definimos las queries
     queries = [
         Query(
             query=q,
@@ -257,7 +255,7 @@ def scrape_linkedin_jobs() -> list:
                 limit=15,
                 filters=QueryFilters(
                     relevance=RelevanceFilters.RECENT,
-                    time=TimeFilters.DAY, # CAMBIA A WEEK para asegurar que traiga algo hoy
+                    time=TimeFilters.DAY, # Mantén WEEK para asegurar resultados en el test
                     type=[TypeFilters.FULL_TIME, TypeFilters.CONTRACT],
                 )
             )
@@ -265,9 +263,9 @@ def scrape_linkedin_jobs() -> list:
         for q in SEARCH_QUERIES
     ]
 
+    # 3. PASAMOS LA COOKIE AQUÍ (Esta es la forma correcta para esta librería)
     try:
-        # Ahora el .run() va limpio, sin el argumento li_at
-        scraper.run(queries) 
+        scraper.run(queries, li_at=li_at_cookie) 
     except Exception as e:
         log.error(f"Error durante el scraping: {e}")
     
