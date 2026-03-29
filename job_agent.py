@@ -257,7 +257,7 @@ def scrape_linkedin_jobs() -> list:
                 limit=15,
                 filters=QueryFilters(
                     relevance=RelevanceFilters.RECENT,
-                    time=TimeFilters.WEEK, # CAMBIA A WEEK para asegurar que traiga algo hoy
+                    time=TimeFilters.DAY, # CAMBIA A WEEK para asegurar que traiga algo hoy
                     type=[TypeFilters.FULL_TIME, TypeFilters.CONTRACT],
                 )
             )
