@@ -231,15 +231,17 @@ def on_end():
 def scrape_linkedin_jobs() -> list:
     """Lanza el scraper y devuelve la lista de ofertas."""
     
-    # IMPORTANTE: Aquí leemos el Secret que definiste en el YAML
+    # Leemos la cookie del Secret de GitHub
     li_at_cookie = os.environ.get("LI_AT_COOKIE") 
 
+    # IMPORTANTE: La cookie se pasa AQUÍ en el constructor, no en el .run()
     scraper = LinkedinScraper(
         chrome_executable_path=None, 
         headless=True,
         max_workers=1,
-        slow_mo=5,            # Un poco más lento para evitar bloqueos
-        page_load_timeout=40
+        slow_mo=5,
+        page_load_timeout=40,
+        li_at=li_at_cookie  # <--- SE PONE AQUÍ
     )
 
     scraper.on(Events.DATA, on_data)
@@ -255,7 +257,7 @@ def scrape_linkedin_jobs() -> list:
                 limit=15,
                 filters=QueryFilters(
                     relevance=RelevanceFilters.RECENT,
-                    time=TimeFilters.DAY,
+                    time=TimeFilters.WEEK, # CAMBIA A WEEK para asegurar que traiga algo hoy
                     type=[TypeFilters.FULL_TIME, TypeFilters.CONTRACT],
                 )
             )
@@ -263,12 +265,11 @@ def scrape_linkedin_jobs() -> list:
         for q in SEARCH_QUERIES
     ]
 
-    # PASAMOS LA COOKIE AQUÍ   y le meto un TRY por si ha detectado que la IP de GitHub es un bot y ha invalidado la cookie.
     try:
-        scraper.run(queries, li_at=li_at_cookie)
+        # Ahora el .run() va limpio, sin el argumento li_at
+        scraper.run(queries) 
     except Exception as e:
-        log.error(f"Error durante el scraping (posible bloqueo de cookie): {e}")
-        # No lanzamos el error, dejamos que el script siga con lo que haya capturado
+        log.error(f"Error durante el scraping: {e}")
     
     return scraped_jobs
 # ──────────────────────────────────────────────
