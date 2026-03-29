@@ -16,29 +16,39 @@ SEARCH_QUERIES = ["Data AI Cloud", "Solutions Architect Cloud", "Inteligencia Ar
 # Añade aquí el resto de tus queries
 
 def scrape_linkedin_jobs():
-    """Busca ofertas usando el buscador público de LinkedIn (Guest API)."""
+    """Busca ofertas usando el buscador público con una Regex más robusta."""
     all_jobs = []
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
     }
 
     for query in SEARCH_QUERIES:
+        query_esc = query.replace(" ", "%20")
         log.info(f"Buscando: {query}...")
-        # Buscamos en Madrid, España (geoId 104305776) o por texto
-        url = f"https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords={query}&location=Madrid%2C%20España&f_TPR=r604800"
+        
+        # URL de la API de 'ver más' que es más fácil de parsear
+        url = f"https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords={query_esc}&location=Madrid%2C%20España&f_TPR=r604800&start=0"
         
         try:
             res = requests.get(url, headers=headers, timeout=15)
-            # Extraer IDs de trabajos con Regex del HTML devuelto
-            job_ids = re.findall(r'data-entity-id=\"urn:li:jobListing:(\d+)\"', res.text)
-            
-            for j_id in set(job_ids):
+            # Probamos con dos patrones comunes de LinkedIn para asegurar el tiro
+            job_ids = re.findall(r'job-search-card__list-item["\'].*?data-id=["\'](\d+)["\']', res.text)
+            if not job_ids:
+                job_ids = re.findall(r'jobPostingCardApiHandle["\'].*?data-id=["\'](\d+)["\']', res.text)
+            if not job_ids:
+                job_ids = re.findall(r'entity-id=["\']urn:li:jobListing:(\d+)["\']', res.text)
+
+            unique_ids = list(set(job_ids))
+            for j_id in unique_ids:
                 all_jobs.append({
                     'id': j_id,
-                    'title': "Oferta encontrada", 
+                    'title': f"Oferta {j_id}", 
                     'link': f"https://www.linkedin.com/jobs/view/{j_id}/",
                 })
-            time.sleep(1) # Cortesía para evitar bloqueos
+            
+            log.info(f"-> {query}: {len(unique_ids)} ofertas encontradas.")
+            time.sleep(2) 
         except Exception as e:
             log.error(f"Error en query {query}: {e}")
 
