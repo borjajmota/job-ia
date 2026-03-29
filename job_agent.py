@@ -230,14 +230,16 @@ def on_end():
 
 def scrape_linkedin_jobs() -> list:
     """Lanza el scraper y devuelve la lista de ofertas."""
+    # Intentamos obtener la cookie de las variables de entorno
+    li_at_cookie = os.environ.get("LINKEDIN_LI_AT")
+
     scraper = LinkedinScraper(
-        chrome_executable_path=None,   # usa el Chrome del sistema
-        chrome_options=None,
+        chrome_executable_path=None, 
         headless=True,
-        max_workers=1,
-        slow_mo=3,
-        page_load_timeout=40
-        shuffle_proxy=True,    # Si usas proxies
+        max_workers=1,        # Mantenlo en 1 para evitar bloqueos por concurrencia
+        slow_mo=5,            # Aumentamos a 5 segundos para parecer más humanos
+        page_load_timeout=40, # Añadida la coma que faltaba aquí
+        shuffle_proxy=False   # En GitHub Actions, mejor dejarlo en False si no tienes proxies reales
     )
 
     scraper.on(Events.DATA, on_data)
@@ -251,10 +253,10 @@ def scrape_linkedin_jobs() -> list:
                 locations=["Madrid, España"],
                 apply_link=True,
                 skip_promoted_jobs=False,
-                limit=25,
+                limit=15, # Bajamos de 25 a 15 para reducir el tiempo de exposición
                 filters=QueryFilters(
                     relevance=RelevanceFilters.RECENT,
-                    time=TimeFilters.DAY,          # Solo últimas 24h
+                    time=TimeFilters.DAY,
                     type=[TypeFilters.FULL_TIME, TypeFilters.CONTRACT],
                 )
             )
@@ -262,7 +264,9 @@ def scrape_linkedin_jobs() -> list:
         for q in SEARCH_QUERIES
     ]
 
-    scraper.run(queries)
+    # Ejecutar con la cookie li_at si está disponible
+    # Importante: Asegúrate de que el scraper recibe la cookie correctamente
+    scraper.run(queries, li_at=li_at_cookie) 
     return scraped_jobs
 
 # ──────────────────────────────────────────────
