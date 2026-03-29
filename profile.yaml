@@ -1,0 +1,283 @@
+# ============================================================
+# PERFIL PROFESIONAL - BORJA JIMÉNEZ MOTA
+# Usado por el agente IA para analizar el match de cada oferta
+# ============================================================
+
+personal:
+  name: "Borja Jiménez Mota"
+  email: "borja.jmota@gmail.com"
+  location: "Madrid, España"
+  linkedin: "linkedin.com/in/borja-mota"
+  languages:
+    - "Español (nativo)"
+    - "Inglés (profesional)"
+
+# -----------------------------------------------
+# RESUMEN DE IDENTIDAD PROFESIONAL
+# -----------------------------------------------
+summary: |
+  Profesional híbrido con más de 10 años de experiencia internacional (España y EEUU)
+  en el cruce entre arquitectura de datos/IA y gestión estratégica de negocio.
+  Ha evolucionado de Data Engineer hands-on a líder técnico y program manager,
+  manteniendo siempre la capacidad de bajar al detalle técnico cuando hace falta.
+  Su diferencial: traduce necesidades de negocio complejas en arquitecturas cloud
+  escalables, y lidera equipos multidisciplinares de punta a punta, desde PoC hasta
+  producción global. Orientado a ROI, a la toma de decisiones, a los retos ambiciosos
+  y a la mejora continua.
+
+# -----------------------------------------------
+# EXPERIENCIA PROFESIONAL
+# -----------------------------------------------
+experience:
+  - role: "Data & AI Program Manager + Solutions Architect"
+    company: "Inditex"
+    period: "2022 - actualidad (4+ años)"
+    highlights:
+      - "Liderazgo de equipo multidisciplinar de hasta 10 personas: contratación, mentoring, career growth"
+      - "Diseño y entrega de iniciativas estratégicas Data & AI en múltiples dominios: Riesgos, CX, Omnicanal, Operaciones, Sostenibilidad"
+      - "Gestión de presupuestos, planificación de programas y stakeholder management con C-levels y directores de área"
+      - "Solutions Architect end-to-end: desde definición de arquitectura hasta puesta en producción global"
+      - "Spearhead de PoCs con LLMs, RAG, Fine-Tuning con retorno de negocio medible"
+      - "Actuó como Product Owner y Tech Lead en proyectos seleccionados"
+
+  - role: "Data Team Lead"
+    company: "Bluetab (para BBVA)"
+    period: "2021 - 2022"
+    highlights:
+      - "Liderazgo técnico global del producto digital de BBVA en España, México y Colombia"
+      - "Definición de arquitectura y supervisión de equipos técnicos distribuidos"
+      - "Pipelines ETL complejos con Spark/Scala y Python"
+
+  - role: "Senior Big Data Engineer"
+    company: "Bluetab (para BBVA USA)"
+    period: "2019 - 2021 (Birmingham, AL, EEUU)"
+    highlights:
+      - "Proyecto Global Financial Architecture de BBVA USA (on-site)"
+      - "Data Governance y Data Quality en infraestructuras Big Data"
+      - "Re-engineering de soluciones Spark/Scala"
+
+  - role: "Big Data Engineer"
+    company: "Minsait (para Santander)"
+    period: "2018"
+    highlights:
+      - "ETL con Scala/Spark, clusters Cloudera, Hive/Impala"
+
+# -----------------------------------------------
+# PROYECTOS DESTACADOS (Portfolio Inditex)
+# -----------------------------------------------
+portfolio_projects:
+  - name: "Supply Chain Risks Tool"
+    domain: "Riesgos"
+    impact: "2.814M movimientos analizados, 806K empresas, 2.729 informes automatizados"
+    stack: ["Databricks", "Snowflake", "Azure DevOps", "Azure Functions", "Azure Containers", "Spark", "API-REST", "Python", "AI", "Streamlit"]
+
+  - name: "RiskSearching"
+    domain: "Riesgos"
+    impact: "412 búsquedas definidas, 702K búsquedas realizadas, 4.147 alertas monitoreadas"
+    stack: ["Databricks", "Snowflake", "Azure Functions", "API-REST", "Python", "Streamlit"]
+
+  - name: "PeopleCounter"
+    domain: "Business / Retail Analytics"
+    impact: "Dato estratégico global para todas las cadenas. Ingesta RealTime de entradas/salidas en tiendas"
+    stack: ["Snowflake", "Kafka", "Azure DevOps", "API-REST", "Python", "PowerBI"]
+
+  - name: "Digital Twin Stores"
+    domain: "Business / Retail Analytics"
+    impact: "Gemelo digital de 23 tiendas con análisis RealTime de comportamiento de cliente"
+    stack: ["Snowflake", "Kafka", "API-REST", "Python", "PowerBI"]
+
+  - name: "Google Reviews & QR Survey (CX-Data)"
+    domain: "Customer Experience"
+    impact: "+4M opiniones analizadas, 2.6M reseñas, +400 usuarios activos en portal de autogestión"
+    stack: ["Databricks", "Snowflake", "LLMs", "NLP", "Python", "PowerBI"]
+
+  - name: "Survey Online NLP"
+    domain: "Customer Experience"
+    impact: "+400K feedbacks, 98.7% eficacia, retorno 140k€/año"
+    stack: ["Databricks", "Snowflake", "LLMs", "Python", "PowerBI"]
+
+  - name: "OmniTag-IA"
+    domain: "Omnicanal"
+    impact: "40K etiquetas, 117 tiendas, retorno 123k€/año. Etiquetado multiagente de imágenes"
+    stack: ["Databricks", "Snowflake", "LLMs", "LangChain", "LangGraph", "PineCone", "Azure Functions", "Python"]
+
+  - name: "ITX MyBusiness (LoCA)"
+    domain: "Omnicanal"
+    impact: "417K updates, 5.5K localizaciones gestionadas, ahorro 300k€/año"
+    stack: ["Databricks", "Snowflake", "Microservicios REST", "Python", "PowerBI"]
+
+  - name: "MOCACO IA Tags"
+    domain: "Business / Producto"
+    impact: "Etiquetado IA de características de prendas a través de análisis de imágenes"
+    stack: ["Databricks", "Snowflake", "LLMs", "Python", "PowerBI"]
+
+  - name: "UpSelling"
+    domain: "Business / CX"
+    impact: "Algoritmia combinatoria cartesiana para análisis de perfiles y patrones de compra"
+    stack: ["Databricks", "Snowflake", "Algoritmia", "Python", "PowerBI"]
+
+  - name: "Categorización Motivos Devolución"
+    domain: "Operaciones"
+    impact: "+300K etiquetados, 4 cadenas, retorno 110k€/año"
+    stack: ["Databricks", "Snowflake", "LLMs", "Python", "PowerBI"]
+
+  - name: "Portal gestión Couriers (CO2)"
+    domain: "Sostenibilidad"
+    impact: "Plataforma de gestión de flota y red logística para cálculo de huella de carbono"
+    stack: ["Snowflake", "Python", "Azure Container", "Streamlit", "JavaScript"]
+
+# -----------------------------------------------
+# SKILLS TÉCNICOS
+# -----------------------------------------------
+technical_skills:
+  cloud_platforms:
+    - "Azure (Azure DevOps, Azure Functions, Azure Containers, Azure Data Factory)"
+    - "GCP"
+    - "AWS (conocimiento)"
+    - "Databricks"
+    - "Snowflake"
+
+  data_engineering:
+    - "Apache Spark"
+    - "Scala"
+    - "Python"
+    - "ETL/ELT design"
+    - "Data Governance"
+    - "Data Quality"
+    - "Kafka (streaming)"
+    - "API-REST"
+
+  ai_ml:
+    - "LLMs"
+    - "RAG (Retrieval Augmented Generation)"
+    - "Fine-Tuning"
+    - "NLP (Sentiment Analysis, NER, Classification)"
+    - "LangChain"
+    - "LangGraph"
+    - "PineCone (vector DB)"
+    - "Multiagent systems"
+    - "Computer Vision (image tagging)"
+    - "ACE"
+
+  visualization_and_apps:
+    - "Power BI"
+    - "Streamlit"
+    - "JavaScript"
+
+  management_and_delivery:
+    - "PMO"
+    - "Program Management"
+    - "Product Ownership (PO)"
+    - "Solutions Architecture"
+    - "Stakeholder Management"
+    - "Budget Management"
+    - "Hiring & Team Building"
+    - "Agile / Scrum"
+
+# -----------------------------------------------
+# SOFT SKILLS E IDENTIDAD
+# -----------------------------------------------
+soft_skills:
+  - "Muy buena comunicación con C-levels y perfiles técnicos por igual"
+  - "Habilidad natural para vender ideas y proyectos internamente"
+  - "Liderazgo de equipos multidisciplinares y gestión del talento"
+  - "Capacidad resolutiva y autonomía alta bajo presión"
+  - "Inconformista y orientado a la mejora continua"
+  - "Orientado a automatización y optimización de procesos"
+  - "Mentalidad emprendedora: ve oportunidades donde otros ven procesos"
+  - "Aprendizaje continuo y rápida adaptación a nuevas tecnologías"
+  - "Obsesión por el ROI y el impacto medible"
+  - "Experiencia probada en gestión de datos orientada al cliente (CX)"
+
+# -----------------------------------------------
+# ROL IDEAL Y PREFERENCIAS
+# -----------------------------------------------
+ideal_role:
+  titles_of_interest:
+    - "Head of Data"
+    - "Head of Data & AI"
+    - "Head of Analytics"
+    - "Data & AI Program Manager"
+    - "Delivery Manager Data & AI"
+    - "Solutions Architect (Data / AI / Cloud)"
+    - "Forward Deployed Engineer"
+    - "Technical Program Manager"
+    - "Product Manager (Data/AI)"
+    - "Engineering Manager (Data)"
+    - "AI Lead"
+    - "Data Platform Lead"
+    - "Chief Data Officer (escala-up / empresa mediana)"
+
+  what_motivates:
+    - "Toma de decisiones con impacto real"
+    - "Gestión de presupuesto y recursos"
+    - "Relación directa con stakeholders y C-levels"
+    - "Retos ambiciosos y objetivos claros"
+    - "Autonomía para proponer e implementar mejoras"
+    - "Liderar equipos y contribuir al desarrollo de carreras"
+    - "Proyectos que combinen visión estratégica y ejecución técnica"
+
+  company_preferences:
+    - "Empresas de renombre / marca reconocida"
+    - "Scale-ups con ambición y producto propio"
+    - "Empresas con cultura de datos madura o en proceso de madurez"
+    - "Startups o empresas con espíritu emprendedor (si el reto es grande)"
+    - "Se valora positivamente sector retail, fintech, tecnología, consultoría estratégica"
+
+  sectors_preferred:
+    - "Retail / eCommerce"
+    - "Fintech / Banca"
+    - "Tecnología / SaaS"
+    - "Consultoría estratégica / Big 4 (práctica Data & AI)"
+    - "Moda / Lujo"
+    - "Salud / Seguros (si hay strong data component)"
+    - "Movilidad / Logística"
+
+  sectors_to_avoid:
+    - "Administración pública"
+    - "Hostelería sin componente tecnológico"
+    - "Manufactura sin transformación digital"
+
+  work_mode:
+    preference: "Híbrido (Madrid)"
+    remote_ok: true
+    relocation: false
+    note: "Acepta full remote si la empresa y el rol lo merecen. No relocación fuera de España."
+
+  seniority:
+    min_level: "Senior"
+    target_level: "Lead / Head / Director"
+    note: |
+      Consciente de que roles de Head of Data piden más años en dirección pura.
+      Pero su perfil híbrido arquitecto+manager es un diferencial real.
+      No descarta roles de Solutions Architect o Senior PM si el scope es grande
+      y hay camino de crecimiento claro.
+
+# -----------------------------------------------
+# RED FLAGS - DESCARTE AUTOMÁTICO
+# -----------------------------------------------
+disqualifiers:
+  - "Rol 100% hands-on coding sin componente de liderazgo o arquitectura (Data Engineer junior/mid)"
+  - "Rol de ventas puras sin componente técnico (Sales Account Executive genérico)"
+  - "Administración pública"
+  - "Reubicación fuera de España como requisito"
+  - "Sector sin componente de datos relevante"
+  - "Roles de soporte técnico o helpdesk"
+  - "Roles de BI puro sin estrategia ni liderazgo"
+
+# -----------------------------------------------
+# ASPECTOS QUE PUEDE SUPLIR (para VÁLIDAS CON MATICES)
+# -----------------------------------------------
+compensable_gaps:
+  - gap: "Experiencia en sector específico no cubierto"
+    compensates_with: "Experiencia cross-sector en Inditex (retail, logística, fintech-like en BBVA)"
+  - gap: "Título exacto no coincide (ej. piden Head of Data pero tiene PM title)"
+    compensates_with: "Ha ejercido funciones equivalentes: equipo, budget, arquitectura, estrategia"
+  - gap: "Piden AWS/GCP certificación específica"
+    compensates_with: "Azure profundo + experiencia multi-cloud demostrable, curva de aprendizaje mínima"
+  - gap: "Piden experiencia en startup (nunca ha trabajado en una)"
+    compensates_with: "Mentalidad emprendedora demostrada con iniciativas propias dentro de Inditex"
+  - gap: "Piden más años en dirección pura (5+ años managing)"
+    compensates_with: "4+ años liderando equipos en Inditex, con hiring, presupuesto y stakeholder management real"
+  - gap: "Piden MLOps o Data Science profundo"
+    compensates_with: "Ha supervisado y entregado proyectos de ML/LLM en producción, aunque no es el científico de datos"
