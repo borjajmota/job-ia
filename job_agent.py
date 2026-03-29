@@ -230,16 +230,16 @@ def on_end():
 
 def scrape_linkedin_jobs() -> list:
     """Lanza el scraper y devuelve la lista de ofertas."""
-    # Intentamos obtener la cookie de las variables de entorno
-    li_at_cookie = os.environ.get("LINKEDIN_LI_AT")
+    
+    # IMPORTANTE: Aquí leemos el Secret que definiste en el YAML
+    li_at_cookie = os.environ.get("LI_AT_COOKIE") 
 
     scraper = LinkedinScraper(
         chrome_executable_path=None, 
         headless=True,
-        max_workers=1,        # Mantenlo en 1 para evitar bloqueos por concurrencia
-        slow_mo=5,            # Aumentamos a 5 segundos para parecer más humanos
-        page_load_timeout=40, # Añadida la coma que faltaba aquí
-        shuffle_proxy=False   # En GitHub Actions, mejor dejarlo en False si no tienes proxies reales
+        max_workers=1,
+        slow_mo=5,            # Un poco más lento para evitar bloqueos
+        page_load_timeout=40
     )
 
     scraper.on(Events.DATA, on_data)
@@ -252,8 +252,7 @@ def scrape_linkedin_jobs() -> list:
             options=QueryOptions(
                 locations=["Madrid, España"],
                 apply_link=True,
-                skip_promoted_jobs=False,
-                limit=15, # Bajamos de 25 a 15 para reducir el tiempo de exposición
+                limit=15,
                 filters=QueryFilters(
                     relevance=RelevanceFilters.RECENT,
                     time=TimeFilters.DAY,
@@ -264,11 +263,9 @@ def scrape_linkedin_jobs() -> list:
         for q in SEARCH_QUERIES
     ]
 
-    # Ejecutar con la cookie li_at si está disponible
-    # Importante: Asegúrate de que el scraper recibe la cookie correctamente
+    # PASAMOS LA COOKIE AQUÍ
     scraper.run(queries, li_at=li_at_cookie) 
     return scraped_jobs
-
 # ──────────────────────────────────────────────
 # EMAIL HTML
 # ──────────────────────────────────────────────
