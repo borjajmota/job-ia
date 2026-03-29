@@ -235,8 +235,9 @@ def scrape_linkedin_jobs() -> list:
         chrome_options=None,
         headless=True,
         max_workers=1,
-        slow_mo=1.2,
+        slow_mo=3,
         page_load_timeout=40
+        shuffle_proxy=True,    # Si usas proxies
     )
 
     scraper.on(Events.DATA, on_data)
