@@ -1,3 +1,0 @@
-- cron: '0 8 * * 1-5'   # 08:00 UTC lunes-viernes
-- cron: '0 7 * * 1-5'   # 07:00 UTC (09:00 Madrid invierno)
-- cron: '0 6 * * *'     # 06:00 UTC todos los días
