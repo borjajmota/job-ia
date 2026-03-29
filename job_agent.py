@@ -29,11 +29,10 @@ GMAIL_APP_PASS  = os.environ.get("GMAIL_APP_PASSWORD")
 EMAIL_TO        = os.environ.get("EMAIL_TO", GMAIL_USER)
 
 SEARCH_QUERIES = [
-    "Data AI Cloud", "Solutions Architect Cloud", "Inteligencia Artificial",
-    "Head of Data Engineering", "Program Manager Data"
+    "Solutions Architect Cloud", "Data Strategy Director", 
+    "Head of Data Engineering", "Program Manager AI"
 ]
 
-# --- CARGA DE DATOS ---
 def load_profile():
     with open(PROFILE_PATH, "r", encoding="utf-8") as f: return yaml.safe_load(f)
 
@@ -51,78 +50,144 @@ def load_queue():
 def save_queue(queue):
     QUEUE_PATH.write_text(json.dumps(queue, ensure_ascii=False, indent=2))
 
-# --- SCRAPER (EL CORAZÓN DEL BYPASS) ---
+# --- MOTOR DE SCRAPING REFORZADO ---
 def scrape_linkedin_jobs():
     jobs_found = []
-    # Usamos la API de "ver más" de invitados, que es la más fiable sin login
+    # Simulamos un navegador real de 2026
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
+        "Referer": "https://www.google.com/", # CRÍTICO: LinkedIn confía más si vienes de Google
+        "Upgrade-Insecure-Requests": "1"
     }
 
     for query in SEARCH_QUERIES:
-        log.info(f"🔎 Buscando: {query}...")
-        # Esta URL es la clave: carga los resultados dinámicos
-        url = f"https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords={query.replace(' ', '%20')}&location=Madrid%2C%20España&f_TPR=r604800&start=0"
+        log.info(f"🔎 Atacando query: {query}")
+        # URL de la API de carga dinámica (Guest API)
+        url = f"https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords={query.replace(' ', '%20')}&location=Madrid&f_TPR=r86400&start=0"
         
         try:
             res = requests.get(url, headers=headers, timeout=15)
-            # Buscamos IDs de ofertas en cualquier formato posible
+            log.info(f"   HTTP Status: {res.status_code}")
+            
+            # Buscamos IDs usando 3 patrones distintos de 2026
             ids = re.findall(r'jobPosting:(\d+)', res.text)
             if not ids:
                 ids = re.findall(r'data-id=["\'](\d+)["\']', res.text)
-            
+            if not ids:
+                ids = re.findall(r'view/(\d+)', res.text)
+
             unique_ids = list(set(ids))
-            log.info(f"   ✅ Encontrados {len(unique_ids)} IDs.")
+            log.info(f"   🎯 IDs capturados: {len(unique_ids)}")
 
             for j_id in unique_ids:
                 jobs_found.append({
                     "job_id": j_id,
                     "link": f"https://www.linkedin.com/jobs/view/{j_id}/"
                 })
-            time.sleep(random.uniform(2, 4))
+            
+            time.sleep(random.uniform(4, 7)) # Pausa para no quemar la IP
         except Exception as e:
-            log.error(f"Error en query {query}: {e}")
+            log.error(f"   ❌ Error en query: {e}")
             
     return jobs_found
 
-# --- ANÁLISIS IA ---
+# --- ANÁLISIS IA (GEMINI 2.0 FLASH) ---
 def analyze_job_with_ia(profile, job_link):
     if not GEMINI_API_KEY: return None
     client = genai.Client(api_key=GEMINI_API_KEY)
     
-    # Le pedimos que él mismo averigüe el título y la empresa entrando al link
     prompt = f"""
-    Analiza esta oferta de LinkedIn: {job_link}
-    Basándote en este perfil profesional: {yaml.dump(profile, allow_unicode=True)}
+    Actúa como reclutador senior. Analiza esta oferta: {job_link}
+    Perfil de Borja: {yaml.dump(profile, allow_unicode=True)}
     
-    Responde ESTRICTAMENTE en JSON:
+    Responde ÚNICAMENTE en JSON con esta estructura:
     {{
-      "classification": "VÁLIDA" o "VÁLIDA_CON_MATICES" o "DESCARTAR",
-      "score": 0-10,
-      "real_title": "Título del puesto",
-      "company": "Nombre empresa",
-      "match_summary": "Por qué encaja (1 frase)",
-      "gaps": "Qué le falta (si aplica)"
+      "classification": "VÁLIDA" | "VÁLIDA_CON_MATICES" | "DESCARTAR",
+      "score": 1-10,
+      "real_title": "título",
+      "company": "empresa",
+      "match_summary": "resumen corto",
+      "gaps": "si hay"
     }}
     """
     try:
         response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
         clean_json = re.search(r'\{.*\}', response.text, re.DOTALL).group()
         return json.loads(clean_json)
-    except Exception:
+    except:
         return None
 
-# --- EMAIL HTML (TU DISEÑO) ---
-def build_email_html(valid, with_caveats, date_str):
-    def card(j, is_caveat=False):
-        color = "#f59e0b" if is_caveat else "#22c55e"
-        return f"""
-        <div style="border-left:4px solid {color}; padding:10px; margin-bottom:10px; background:#fff;">
-            <strong>{j['title']}</strong> - {j['company']}<br>
-            <small>Score: {j['analysis']['score']}/10 - {j['analysis']['match_summary']}</small><br>
-            <a href="{j['link']}">Ver Oferta</a>
-        </div>"""
+# --- EMAIL (CONSERVANDO TU ESTILO) ---
+def build_email_html(valid, caveats, date):
+    # Genera una lista simple para el reporte
+    def row(j):
+        return f"<li><b>{j['title']}</b> ({j['company']}) - Score: {j['analysis']['score']}/10<br><a href='{j['link']}'>Link</a></li>"
+    
+    v_html = "".join([row(j) for j in valid])
+    c_html = "".join([row(j) for j in caveats])
+    
+    return f"""
+    <html><body>
+    <h2>🚀 Informe de Empleo - {date}</h2>
+    <h3>✅ Válidas ({len(valid)})</h3><ul>{v_html}</ul>
+    <h3>⚠️ Con Matices ({len(caveats)})</h3><ul>{c_html}</ul>
+    </body></html>
+    """
 
-    v_html = "".join(card(j) for j in valid)
-    c_html
+def main():
+    today = datetime.now().strftime("%d/%m/%Y")
+    log.info(f"=== INICIO AGENTE SIGILOSO {today} ===")
+    
+    profile = load_profile()
+    seen_jobs = load_seen_jobs()
+    queue = load_queue()
+    
+    raw_jobs = scrape_linkedin_jobs()
+    new_jobs = [j for j in raw_jobs if j["job_id"] not in seen_jobs]
+    
+    log.info(f"Total nuevas para analizar: {len(new_jobs)}")
+
+    valid_to_send, caveats_to_send = [], []
+
+    for job in new_jobs[:12]: # Máximo 12 para no saturar
+        log.info(f"   🤖 IA analizando: {job['job_id']}")
+        res = analyze_job_with_ia(profile, job['link'])
+        
+        if res and res['classification'] != "DESCARTAR":
+            job.update({"title": res['real_title'], "company": res['company'], "analysis": res})
+            if res['classification'] == "VÁLIDA":
+                valid_to_send.append(job)
+            else:
+                caveats_to_send.append(job)
+            
+            queue.append({
+                "date": today, "applied": False, "score": res['score'],
+                "title": res['real_title'], "company": res['company'], "link": job['link']
+            })
+        
+        seen_jobs.add(job["job_id"])
+        time.sleep(2)
+
+    save_seen_jobs(seen_jobs)
+    save_queue(queue)
+
+    if valid_to_send or caveats_to_send:
+        html = build_email_html(valid_to_send, caveats_to_send, today)
+        
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = f"🎯 {len(valid_to_send)} Ofertas Filtradas - {today}"
+        msg["From"] = GMAIL_USER
+        msg["To"] = EMAIL_TO
+        msg.attach(MIMEText(html, "html"))
+        
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(GMAIL_USER, GMAIL_APP_PASS)
+            server.send_message(msg)
+        log.info("📧 Email enviado con éxito.")
+    else:
+        log.info("Nada relevante hoy.")
+
+if __name__ == "__main__":
+    main()
