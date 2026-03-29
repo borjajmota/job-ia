@@ -81,18 +81,40 @@ def scrape_linkedin_jobs():
     return all_jobs
 
 def analyze_with_gemini(job_link):
-    """Análisis con Gemini 1.5 Flash."""
-    if not GEMINI_API_KEY: return None
+    """Análisis con el modelo actualizado de 2026."""
+    if not GEMINI_API_KEY: 
+        log.error("Falta GEMINI_API_KEY")
+        return None
+    
+    # En 2026 usamos el cliente con el modelo más reciente para evitar el 404
+    # Probamos con gemini-2.0-flash o gemini-3-flash
+    model_name = "gemini-2.0-flash" 
     
     client = genai.Client(api_key=GEMINI_API_KEY)
-    prompt = f"Analiza si este empleo en Madrid es para un perfil Senior/Lead de Cloud o IA: {job_link}. Responde solo JSON: {{'relevant': true/false, 'score': 85, 'reason': '...'}}"
+    
+    prompt = (
+        f"Analiza si este empleo en Madrid es para un perfil Senior/Lead de Cloud o IA: {job_link}. "
+        "Es muy importante que busques palabras clave como 'Cloud', 'Azure', 'AI', 'Machine Learning'. "
+        "Responde ESTRICTAMENTE con un objeto JSON: "
+        "{'relevant': true/false, 'score': 85, 'reason': 'explicación corta'}"
+    )
     
     try:
-        response = client.models.generate_content(model="gemini-1.5-flash", contents=prompt)
-        # Limpieza de la respuesta para asegurar que sea JSON puro
-        raw_json = re.search(r'\{.*\}', response.text, re.DOTALL).group()
-        return json.loads(raw_json)
-    except:
+        # Usamos la sintaxis simplificada de la v1.0.0+
+        response = client.models.generate_content(
+            model=model_name, 
+            contents=prompt
+        )
+        
+        # Extraemos el JSON de la respuesta
+        text_response = response.text
+        # Limpiador de Markdown por si acaso
+        clean_json = re.search(r'\{.*\}', text_response, re.DOTALL).group()
+        return json.loads(clean_json)
+    
+    except Exception as e:
+        log.error(f"❌ Error en Gemini ({model_name}): {e}")
+        # Si el 2.0 falla, podrías intentar un fallback aquí
         return None
 
 def main():
