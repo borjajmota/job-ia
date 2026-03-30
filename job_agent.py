@@ -69,37 +69,117 @@ def analyze_ia(profile, job_text):
 def main():
     today = datetime.now().strftime("%d/%m/%Y")
     log.info(f"=== INICIO AGENTE {today} ===")
-    profile, seen, queue = load_data()
     
-    found = scrape_ids()
-    new_jobs = [j for j in found if j["id"] not in seen]
-    log.info(f"Nuevas: {len(new_jobs)}")
+    # 1. CARGAR DATOS
+    try:
+        profile, seen_jobs, queue = load_data()
+    except Exception as e:
+        log.error(f"Error cargando archivos base: {e}")
+        return
 
-    valid, caveats = [], []
+    # 2. SCRAPING DE IDs
+    raw_jobs = scrape_ids()
+    
+    # Filtrar las que no hayamos visto nunca
+    new_jobs = [j for j in raw_jobs if j["id"] not in seen_jobs]
+    log.info(f"Total nuevas para analizar: {len(new_jobs)}")
+
+    valid_to_send = []
+    caveats_to_send = []
+
+    # 3. ANÁLISIS CON IA (Limitamos a 10 por tanda para no quemar la API)
     for job in new_jobs[:10]:
-        log.info(f"   🤖 Analizando: {job['id']}")
-        text = get_job_text(job['link'])
-        res = analyze_ia(profile, text)
+        log.info(f"   🤖 IA analizando: {job['id']}")
+        
+        # Extraemos el texto de la web antes de enviarlo a la IA
+        job_text = get_job_text(job['link'])
+        
+        if not job_text:
+            log.warning(f"      ⚠️ No se pudo extraer texto de {job['id']}, saltando...")
+            continue
+            
+        res = analyze_ia(profile, job_text)
         
         if res and res.get('classification') != "DESCARTAR":
-            job.update({"title": res.get('real_title'), "company": res.get('company'), "analysis": res})
-            if res['classification'] == "VÁLIDA": valid.append(job)
-            else: caveats.append(job)
-            queue.append({"date": today, "score": res['score'], "title": job['title'], "link": job['link']})
+            # Enriquecemos el objeto job con la respuesta de la IA
+            job.update({
+                "title": res.get('real_title', 'Puesto sin título'),
+                "company": res.get('company', 'Empresa desconocida'),
+                "analysis": res
+            })
+            
+            if res['classification'] == "VÁLIDA":
+                valid_to_send.append(job)
+            else:
+                caveats_to_send.append(job)
+            
+            # Guardamos en la cola histórica
+            queue.append({
+                "date": today,
+                "score": res.get('score', 0),
+                "title": job['title'],
+                "company": job['company'],
+                "link": job['link'],
+                "summary": res.get('match_summary', '')
+            })
         
-        seen.add(job["id"])
-        time.sleep(5) # Pausa corta, ya no necesitamos 60s porque no navegamos
+        # Marcamos como vista independientemente del resultado
+        seen_jobs.add(job["id"])
+        
+        # Pausa de cortesía para la API de Google
+        time.sleep(12)
 
-    SEEN_PATH.write_text("\n".join(seen))
-    QUEUE_PATH.write_text(json.dumps(queue, indent=2))
+    # 4. GUARDAR ESTADO (Persistencia)
+    try:
+        SEEN_PATH.write_text("\n".join(seen_jobs))
+        QUEUE_PATH.write_text(json.dumps(queue, indent=2, ensure_ascii=False))
+        log.info("✅ Estado guardado en archivos locales.")
+    except Exception as e:
+        log.error(f"Error guardando el estado: {e}")
 
-    if (valid or caveats) and GMAIL_USER:
-        # (Lógica de envío de email simplificada para ahorrar espacio)
-        body = f"Reporte {today}\n" + "\n".join([f"- {j['title']} ({j['company']}): {j['link']}" for j in valid+caveats])
-        msg = MIMEMultipart(); msg["Subject"], msg["From"], msg["To"] = f"🎯 Ofertas {today}", GMAIL_USER, EMAIL_TO
-        msg.attach(MIMEText(body, "plain"))
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s:
-            s.login(GMAIL_USER, GMAIL_PASS); s.send_message(msg)
-        log.info("📧 Email enviado.")
+    # 5. LÓGICA DE EMAIL (CON PRUEBA DE FALLO)
+    if valid_to_send or caveats_to_send:
+        log.info(f"📧 Enviando informe con {len(valid_to_send) + len(caveats_to_send)} ofertas...")
+        html_content = build_email_html(valid_to_send, caveats_to_send, today)
+        
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = f"🎯 {len(valid_to_send)} Ofertas Filtradas - {today}"
+        msg["From"] = GMAIL_USER
+        msg["To"] = EMAIL_TO
+        msg.attach(MIMEText(html_content, "html"))
+        
+        try:
+            with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+                server.login(GMAIL_USER, GMAIL_PASS)
+                server.send_message(msg)
+            log.info("📧 Email enviado con éxito.")
+        except Exception as e:
+            log.error(f"❌ Error crítico enviando email: {e}")
+    else:
+        # --- ESTO ES LO QUE HEMOS AÑADIDO PARA EL TEST ---
+        log.info("Nada relevante hoy. Enviando correo de diagnóstico...")
+        msg = MIMEMultipart()
+        msg["Subject"] = f"🤖 Bot Vivo - {today} (Sin matches)"
+        msg["From"] = GMAIL_USER
+        msg["To"] = EMAIL_TO
+        
+        cuerpo_test = (
+            f"Hola Borja,\n\n"
+            f"El script se ha ejecutado correctamente hoy {today}.\n"
+            f"- Ofertas encontradas en LinkedIn: {len(raw_jobs)}\n"
+            f"- Ofertas nuevas analizadas por la IA: {len(new_jobs[:10])}\n"
+            f"- Resultado: La IA ha descartado todas por no cumplir los requisitos del profile.yaml.\n\n"
+            f"Si recibes este correo, la configuración de Gmail es CORRECTA."
+        )
+        msg.attach(MIMEText(cuerpo_test, "plain"))
+        
+        try:
+            with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+                server.login(GMAIL_USER, GMAIL_PASS)
+                server.send_message(msg)
+            log.info("📧 Email de diagnóstico enviado correctamente.")
+        except Exception as e:
+            log.error(f"❌ Error en el email de diagnóstico: {e}")
 
-if __name__ == "__main__": main()
+if __name__ == "__main__":
+    main()
