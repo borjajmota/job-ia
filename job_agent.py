@@ -241,17 +241,34 @@ INSTRUCCIONES:
 - NO descartes por sector (puede ser retail, banca, salud... da igual si el rol es tech).
 - NO descartes por nombre de empresa desconocida.
 
-Responde ÚNICAMENTE con un JSON con este formato exacto:
-{{"candidates": ["ID1", "ID2", "ID3", ...], "discarded": ["ID4", "ID5", ...]}}
+RESPONDE ÚNICAMENTE CON JSON VÁLIDO. Sin explicaciones, sin texto extra, sin markdown.
+Formato EXACTO (sustituye ID1, ID2... con los IDs reales de la lista de arriba):
+{{"candidates": ["ID1", "ID2"], "discarded": ["ID3", "ID4"]}}
 """
 
-    log.info(f"  [Agente 1] Filtrando {len(jobs_with_titles)} títulos en 1 llamada Gemini...")
+    log.info(f"  [Agente 1] Filtrando {len(jobs_with_titles)} títulos en 1 llamada Groq...")
     raw = call_gemini(prompt, temperature=0.0)
+    log.info(f"  [Agente 1] Respuesta cruda (primeros 300 chars): {raw[:300]}")
     result = parse_json_from_response(raw)
 
     if not result or "candidates" not in result:
-        log.warning("  [Agente 1] No se pudo parsear respuesta. Pasando todos como candidatos.")
-        return [j["id"] for j in jobs_with_titles]
+        log.warning("  [Agente 1] Parse fallido — aplicando filtro de emergencia por keywords")
+        # Filtro de emergencia: keywords que claramente indican relevancia
+        RELEVANT_KEYWORDS = {
+            "data", "ai", "cloud", "analytics", "architect", "platform",
+            "program manager", "product manager", "product owner",
+            "engineering manager", "head of", "director", "lead",
+            "databricks", "snowflake", "azure", "gcp", "aws",
+            "llm", "machine learning", "governance", "delivery manager",
+            "solutions", "datos", "arquitecto", "ia ", "inteligencia artificial",
+        }
+        emergency_candidates = []
+        for j in jobs_with_titles:
+            title_lower = (j["title"] + " " + j.get("company","")).lower()
+            if any(kw in title_lower for kw in RELEVANT_KEYWORDS):
+                emergency_candidates.append(j["id"])
+        log.info(f"  [Agente 1 emergencia] {len(emergency_candidates)} candidatos de {len(jobs_with_titles)}")
+        return emergency_candidates
 
     candidates = result.get("candidates", [])
     discarded  = result.get("discarded", [])
@@ -468,6 +485,13 @@ def main():
     # ── PASO 3: AGENTE 1 — FILTRO DE TÍTULOS (batch, 1 llamada) ──────────
     candidate_ids = agent1_filter_titles(jobs_with_titles, profile)
     log.info(f"Candidatos tras Agente 1: {len(candidate_ids)} de {len(new_jobs)}")
+
+    # Hard cap: máximo 25 candidatos para el Agente 2
+    # Garantiza que el tiempo total sea < 15 min incluso con retries
+    MAX_AGENT2_CANDIDATES = 25
+    if len(candidate_ids) > MAX_AGENT2_CANDIDATES:
+        log.warning(f"  Limitando a {MAX_AGENT2_CANDIDATES} candidatos (había {len(candidate_ids)})")
+        candidate_ids = candidate_ids[:MAX_AGENT2_CANDIDATES]
 
     # ── PASO 4: AGENTE 2 — ANÁLISIS PROFUNDO (1 llamada por candidato) ────
     valid    = []
