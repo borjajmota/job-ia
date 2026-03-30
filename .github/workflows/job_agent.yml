@@ -2,53 +2,37 @@ name: Job Agent — Daily Run
 
 on:
   schedule:
-    # Lunes a viernes a las 08:00 UTC (10:00 Madrid hora verano / 09:00 invierno)
-    #- cron: '0 8 * * 1-5'
-    - cron: '0 7 * * *'     # 07:00 UTC todos los días
-
-  # Permite ejecutarlo manualmente desde la UI de GitHub Actions
+    - cron: '0 8 * * 1-5'
   workflow_dispatch:
 
 jobs:
   run-job-agent:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60    # subimos de 30 a 60 — el Agente 2 con 30 candidatos × 15s = ~8 min, pero con retries puede llegar a 30
 
     steps:
-      # 1. Clonar el repo (incluye seen_jobs.txt y application_queue.json si existen)
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      # 2. Python 3.11
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip"
 
-      # 3. Instalar dependencias
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      # 4. Instalar Chrome (necesario para el scraper de LinkedIn)
-      - name: Install Chrome
-        uses: browser-actions/setup-chrome@v1
-
-      # 5. Ejecutar el agente
       - name: Run job agent
         env:
           GROQ_API_KEY:         ${{ secrets.GROQ_API_KEY }}
-          GEMINI_API_KEY:       ${{ secrets.GEMINI_API_KEY }}
           GMAIL_USER:           ${{ secrets.GMAIL_USER }}
           GMAIL_APP_PASSWORD:   ${{ secrets.GMAIL_APP_PASSWORD }}
           EMAIL_TO:             ${{ secrets.EMAIL_TO }}
-          LI_AT_COOKIE:         ${{ secrets.LI_AT_COOKIE }}
         run: python job_agent.py
 
-      # 6. Persistir seen_jobs.txt y application_queue.json en el repo
-      # Esto es clave: sin este paso los IDs vistos no se guardan entre ejecuciones
       - name: Commit updated state files
         run: |
           git config user.name  "job-agent-bot"
