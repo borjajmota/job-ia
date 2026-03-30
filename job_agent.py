@@ -153,7 +153,7 @@ def get_job_page(url: str) -> dict:
 # ── GEMINI HELPER ───────────────────────────────────────────────────────────
 def call_gemini(prompt: str, temperature: float = 0.1, max_retries: int = 3) -> str:
     """Llama a Groq con reintentos inteligentes ante rate limit (429)."""
-    client = Groq(api_key=GROQ_API_KEY)
+    client = Groq(api_key=GROQ_API_KEY, max_retries=0)  # nosotros gestionamos los retries
     for attempt in range(max_retries):
         try:
             resp = client.chat.completions.create(
@@ -161,6 +161,7 @@ def call_gemini(prompt: str, temperature: float = 0.1, max_retries: int = 3) -> 
                 messages=[{"role": "user", "content": prompt}],
                 temperature=temperature,
                 max_tokens=1500,
+                timeout=30,
             )
             return resp.choices[0].message.content.strip()
         except Exception as e:
@@ -472,6 +473,7 @@ def main():
     valid    = []
     caveats  = []
 
+    candidate_ids = list(dict.fromkeys(candidate_ids))  # elimina duplicados manteniendo orden
     for jid in candidate_ids:
         job = jobs_by_id.get(jid)
         if not job:
@@ -514,7 +516,7 @@ def main():
         # Marcar como vista siempre, independientemente del resultado
         seen_jobs.add(jid)
 
-        time.sleep(12)   # Respeto al rate limit de Gemini free tier
+        time.sleep(15)   # 15s entre llamadas = ~4 req/min, bien por debajo del RPM limit
 
     # Ordenar cola por score desc
     queue.sort(key=lambda x: x.get("score", 0), reverse=True)
