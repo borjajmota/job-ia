@@ -177,11 +177,22 @@ DESCARTAR SI: {disqualifiers}
 LISTA (ID | Título | Empresa):
 {titles_block}
 
+DESCARTAR SIEMPRE (independientemente del título):
+- Junior, Graduate, Intern, Becario, Trainee, Entry-level
+- Freelance, Autónomo, por proyecto
+- Ventas puras, Business Development, Account Executive, Sales Rep
+- RRHH, Legal, Finanzas, Contabilidad sin componente tech
+- Hostelería, Sanidad, Construcción, Inmobiliaria física, Logística operativa
+- Roles 100% hands-on sin liderazgo ni arquitectura (ej: iOS Developer, Mobile Engineer, QA Tester)
+
+INCLUIR SOLO SI:
+- El rol tiene componente de Data, AI, Cloud, Analytics, Architecture, Platform o Digital
+- O es un rol de liderazgo tech (Manager, Lead, Head, Director, Program Manager, Product Manager tech)
+- Empresas conocidas con roles ambiguos: incluir si hay duda
+
 TAREA:
-- Selecciona IDs de ofertas que PODRÍAN encajar con este perfil tecnológico Data/AI/Cloud.
-- Descarta los que claramente NO son tech (hostelería, ventas puras, RRHH sin tech, construcción, sanidad, etc.).
+- Selecciona IDs que cumplan los criterios anteriores.
 - Devuelve MÁXIMO {MAX_AGENT2} IDs, ordenados de MAYOR a MENOR similitud al perfil.
-- Si hay duda, incluir (mejor falso positivo que perder una oferta buena).
 
 RESPONDE SOLO CON ESTE JSON, sin texto adicional ni markdown:
 {{"candidates": ["ID1", "ID2", "ID3"]}}"""
@@ -248,20 +259,31 @@ Título:      {job.get('title','')}
 Empresa:     {job.get('company','')}
 Descripción: {job.get('description','')[:2500]}
 
-REGLAS DE ANÁLISIS:
-1. Si la oferta NO es claramente tecnológica (Data/AI/Cloud/Software/Digital) → DESCARTAR.
-2. Si es tech, analiza el encaje real con experiencia, skills y aspiraciones del perfil.
-3. score_match (1-10): encaje de skills y experiencia con los requisitos.
-4. score_empresa (1-10):
-   - 8-10: empresa grande y reconocida (FAANG, IBM, Accenture, Deloitte, BBVA, Santander, Telefónica, Inditex, etc.)
-   - 5-7: empresa mediana reconocida en su sector
-   - 1-4: empresa pequeña (<50 empleados) o desconocida
-5. score_final = (score_match * 0.7) + (score_empresa * 0.3), redondeado a entero.
+REGLAS DE DESCARTE AUTOMÁTICO (si se cumple alguna → DESCARTAR sin analizar más):
+- La oferta NO es tecnológica (Data/AI/Cloud/Software/Digital/Platform)
+- Es un rol Junior, Graduate, Intern, Becario, Trainee o Entry-level
+- Es Freelance, autónomo o por proyecto puntual
+- Es ventas puras (Sales, BDR, Account Executive) sin componente tech
+- Es RRHH, Legal, Finanzas sin componente tecnológico
+- Es un rol 100% hands-on de desarrollo sin responsabilidad de arquitectura, liderazgo o estrategia
+  (ej: iOS Developer, Mobile Developer, QA Engineer, Junior Developer)
+- El perfil de Borja está claramente sobrecualificado Y el rol no tiene camino de crecimiento
+
+REGLAS DE SCORING (solo si supera el descarte):
+1. score_match (1-10): encaje real de skills, experiencia y aspiraciones con los requisitos del rol.
+   - Penaliza si el rol es demasiado técnico/hands-on sin componente de liderazgo o arquitectura.
+   - Bonifica si el rol combina arquitectura + gestión + estrategia (el perfil ideal de Borja).
+2. score_empresa (1-10):
+   - 8-10: empresa grande y reconocida (FAANG, Accenture, Deloitte, KPMG, McKinsey, BCG, IBM,
+           BBVA, Santander, CaixaBank, Telefónica, Inditex, Repsol, Amadeus, Ferrovial, etc.)
+   - 5-7: empresa mediana reconocida en su sector (>200 empleados)
+   - 1-4: empresa pequeña (<50 empleados) o completamente desconocida
+3. score_final = round((score_match * 0.7) + (score_empresa * 0.3))
 
 CLASIFICACIÓN:
-- VÁLIDA: encaja bien, Borja cumple requisitos principales
-- VÁLIDA_CON_MATICES: hay gap real pero compensable
-- DESCARTAR: no es tech, o gap demasiado grande
+- VÁLIDA: encaja bien con el perfil senior de Borja, cumple requisitos principales
+- VÁLIDA_CON_MATICES: hay gap real pero compensable dado el perfil de Borja
+- DESCARTAR: no supera las reglas de descarte automático, o el gap es demasiado grande
 
 RESPONDE SOLO JSON VÁLIDO sin texto adicional:
 {{
