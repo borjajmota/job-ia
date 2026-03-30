@@ -25,14 +25,36 @@ GMAIL_USER     = os.environ.get("GMAIL_USER")
 GMAIL_PASS     = os.environ.get("GMAIL_APP_PASSWORD")
 EMAIL_TO       = os.environ.get("EMAIL_TO", GMAIL_USER)
 
-# Búsquedas amplias — objetivo: cubrir todo el mercado tech/data en Madrid
-# NO filtramos por título exacto; eso lo hace el Agente 1
+# Búsquedas amplias — objetivo: dragar el máximo de ofertas tech/data posibles.
+# La estrategia es usar términos PARAGUAS que aparecen en casi cualquier oferta
+# relevante, sin filtrar por título. El Agente 1 se encarga del filtro real.
+# Cada query devuelve hasta ~25 resultados de las últimas 24h en Madrid.
 SEARCH_QUERIES = [
-    "Data Cloud Technology Madrid",
-    "AI Machine Learning Madrid",
-    "Technology Manager Director Madrid",
-    "Digital Transformation Madrid",
-    "Engineering Manager Platform Madrid",
+    # ── Core tech/data ──────────────────────────────────────────────────
+    "Data",           # Data Engineer, Head of Data, Data Analyst, Data PM...
+    "AI",             # AI Lead, ML Engineer, AI Product Manager, LLM...
+    "Cloud",          # Cloud Architect, Platform Engineer, DevOps Lead...
+    "Analytics",      # Analytics Manager, Head of Analytics, BI Lead...
+    # ── Roles de liderazgo ──────────────────────────────────────────────
+    "Head",           # Head of Data, Head of Engineering, Head of Product...
+    "Lead",           # Tech Lead, Data Lead, AI Lead, Engineering Lead...
+    "Director",       # Director of Data, Director of Engineering...
+    "Manager",        # Engineering Manager, Program Manager, Product Manager...
+    # ── Roles de arquitectura y producto ────────────────────────────────
+    "Architect",      # Solutions Architect, Enterprise Architect, Data Architect...
+    "Product",        # Product Manager, Product Owner, Product Lead (tech)...
+    # ── Especialidades alineadas con tu perfil ──────────────────────────
+    "Governance",     # Data Governance, AI Governance, IT Governance...
+    "Platform",       # Platform Engineer, Data Platform, ML Platform Lead...
+    "Delivery",       # Delivery Manager, Program Delivery, Agile Delivery...
+    "Innovation",     # Innovation Manager, AI Innovation, Digital Innovation...
+    "Transformation", # Digital Transformation, Data Transformation Lead...
+]
+
+# Ubicaciones a rastrear
+SEARCH_LOCATIONS = [
+    "Madrid%2C%20Espa%C3%B1a",
+    "Spain",  # captura remoto España
 ]
 
 # ── CARGA DE DATOS ──────────────────────────────────────────────────────────
@@ -42,37 +64,43 @@ def load_data():
     queue   = json.loads(QUEUE_PATH.read_text()) if QUEUE_PATH.exists() else []
     return profile, seen, queue
 
-# ── SCRAPING DE IDs (tu versión que ya funciona) ────────────────────────────
+# ── SCRAPING DE IDs ─────────────────────────────────────────────────────────
 def scrape_job_ids() -> list[dict]:
-    jobs    = []
+    """
+    Draga LinkedIn con términos paraguas (Data, AI, Cloud, Manager...) en Madrid
+    y Spain (remoto). La deduplicación dentro de la misma ejecución es por set.
+    El Agente 1 se encarga del filtro real por relevancia.
+    """
+    jobs        = []
     seen_in_run = set()
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
         "Referer":    "https://www.google.com/",
     }
-    for q in SEARCH_QUERIES:
-        log.info(f"  Buscando: {q}")
-        url = (
-            f"https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search"
-            f"?keywords={q.replace(' ','%20')}&location=Madrid%2C%20Espa%C3%B1a"
-            f"&f_TPR=r86400&start=0"   # f_TPR=r86400 → últimas 24h
-        )
-        try:
-            res = requests.get(url, headers=headers, timeout=12)
-            ids = re.findall(r'jobPosting:(\d+)', res.text)
-            if not ids:
-                ids = re.findall(r'data-id=["\'](\d+)["\']', res.text)
-            for jid in ids:
-                if jid not in seen_in_run:
-                    seen_in_run.add(jid)
-                    jobs.append({
-                        "id":   jid,
-                        "link": f"https://www.linkedin.com/jobs/view/{jid}/",
-                    })
-            time.sleep(4)
-        except Exception as e:
-            log.warning(f"  Error scraping '{q}': {e}")
-    log.info(f"IDs únicos recogidos: {len(jobs)}")
+    for location in SEARCH_LOCATIONS:
+        for q in SEARCH_QUERIES:
+            log.info(f"  [{q}] @ [{location}]")
+            url = (
+                f"https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search"
+                f"?keywords={q.replace(' ','%20')}&location={location}"
+                f"&f_TPR=r86400&start=0"
+            )
+            try:
+                res = requests.get(url, headers=headers, timeout=12)
+                ids = re.findall(r'jobPosting:(\d+)', res.text)
+                if not ids:
+                    ids = re.findall(r'data-id=["\'](\d+)["\']', res.text)
+                added = 0
+                for jid in ids:
+                    if jid not in seen_in_run:
+                        seen_in_run.add(jid)
+                        jobs.append({"id": jid, "link": f"https://www.linkedin.com/jobs/view/{jid}/"})
+                        added += 1
+                log.info(f"    +{added} nuevos (total: {len(jobs)})")
+                time.sleep(3)
+            except Exception as e:
+                log.warning(f"  Error scraping '{q}': {e}")
+    log.info(f"Total IDs únicos recogidos: {len(jobs)}")
     return jobs
 
 # ── EXTRACCIÓN DE TEXTO DE OFERTA ───────────────────────────────────────────
@@ -113,7 +141,7 @@ def get_job_page(url: str) -> dict:
 # ── GEMINI HELPER ───────────────────────────────────────────────────────────
 def call_gemini(prompt: str, temperature: float = 0.1) -> str:
     genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    model = genai.GenerativeModel("gemini-2.0-flash")
     try:
         resp = model.generate_content(
             prompt,
