@@ -124,28 +124,43 @@ def analyze_job_with_ia(profile, job_link):
         log.error("Falta GEMINI_API_KEY")
         return None
     
+    # Configuración forzando la versión estable de la API
     genai.configure(api_key=GEMINI_API_KEY)
+    
+    # El nombre del modelo debe ser 'gemini-1.5-flash' sin prefijos extra
     model = genai.GenerativeModel('gemini-1.5-flash')
     
     resumen_perfil = profile.get('summary', '')[:500]
     prompt = (
         f"Analiza si este empleo {job_link} encaja con este perfil: {resumen_perfil}. "
         "Responde ESTRICTAMENTE con un JSON con estos campos: "
-        '{"classification": "VÁLIDA" o "VÁLIDA_CON_MATICES" o "DESCARTAR", '
-        '"score": 1-10, "real_title": "título", "company": "empresa", "match_summary": "resumen"}'
+        '{"classification": "VÁLIDA", "score": 9, "real_title": "título", "company": "empresa", "match_summary": "resumen"}'
     )
 
     for attempt in range(3):
         try:
+            # Añadimos una pequeña pausa antes de llamar para evitar colisiones
+            time.sleep(2) 
             response = model.generate_content(prompt)
+            
+            # Verificación de seguridad por si la respuesta viene vacía
+            if not response or not response.text:
+                continue
+
             match = re.search(r'\{.*\}', response.text, re.DOTALL)
             if match:
                 return json.loads(match.group())
         except Exception as e:
-            if "429" in str(e):
-                wait = 65 * (attempt + 1) # Espera superior al minuto para resetear cuota
+            # Si el error es de cuota (429) o de modelo (404), intentamos manejarlo
+            error_msg = str(e)
+            if "429" in error_msg:
+                wait = 70 * (attempt + 1)
                 log.warning(f"⏳ Límite de cuota IA. Esperando {wait}s...")
                 time.sleep(wait)
+            elif "404" in error_msg:
+                log.error("❌ Error 404: Reintentando con variante de nombre...")
+                # Intento desesperado con el nombre alternativo si falla el principal
+                model = genai.GenerativeModel('gemini-pro') 
             else:
                 log.error(f"❌ Error en Gemini: {e}")
                 break
