@@ -37,8 +37,11 @@ SEARCH_QUERIES = [
     "Analytics",      # Analytics Manager, Head of Analytics, BI Lead...
     # ── Roles de liderazgo ──────────────────────────────────────────────
     "Head",           # Head of Data, Head of Engineering, Head of Product...
-    "Lead",           # Tech Lead, Data Lead, AI Lead, Engineering Lead...
-    "Director",       # Director of Data, Director of Engineering...
+    "Tech Lead",           # Tech Lead, Data Lead, AI Lead, Engineering Lead...
+    "Product Owner",
+    "Program Manager",
+    "Delivery Manager",
+    #"Director",       # Director of Data, Director of Engineering...
     "Manager",        # Engineering Manager, Program Manager, Product Manager...
     # ── Roles de arquitectura y producto ────────────────────────────────
     "Architect",      # Solutions Architect, Enterprise Architect, Data Architect...
@@ -90,11 +93,23 @@ def scrape_job_ids() -> list[dict]:
                 ids = re.findall(r'jobPosting:(\d+)', res.text)
                 if not ids:
                     ids = re.findall(r'data-id=["\'](\d+)["\']', res.text)
+                # Extraemos título y empresa directamente del HTML de resultados
+                # para evitar visitar cada URL individualmente en el Agente 1
+                titles   = re.findall(r'class="[^"]*base-search-card__title[^"]*"[^>]*>(.*?)</h3', res.text, re.S)
+                companies= re.findall(r'class="[^"]*base-search-card__subtitle[^"]*"[^>]*>.*?<a[^>]*>(.*?)</a', res.text, re.S)
+                # Limpiamos el HTML
+                titles    = [re.sub(r'<[^<]+?>', '', t).strip() for t in titles]
+                companies = [re.sub(r'<[^<]+?>', '', c).strip() for c in companies]
                 added = 0
-                for jid in ids:
+                for i, jid in enumerate(ids):
                     if jid not in seen_in_run:
                         seen_in_run.add(jid)
-                        jobs.append({"id": jid, "link": f"https://www.linkedin.com/jobs/view/{jid}/"})
+                        jobs.append({
+                            "id":      jid,
+                            "link":    f"https://www.linkedin.com/jobs/view/{jid}/",
+                            "title":   titles[i]   if i < len(titles)    else "",
+                            "company": companies[i] if i < len(companies) else "",
+                        })
                         added += 1
                 log.info(f"    +{added} nuevos (total: {len(jobs)})")
                 time.sleep(3)
@@ -139,21 +154,36 @@ def get_job_page(url: str) -> dict:
         return {"title": "", "company": "", "description": ""}
 
 # ── GEMINI HELPER ───────────────────────────────────────────────────────────
-def call_gemini(prompt: str, temperature: float = 0.1) -> str:
+def call_gemini(prompt: str, temperature: float = 0.1, max_retries: int = 3) -> str:
+    """Llama a Gemini con reintentos inteligentes ante rate limit (429)."""
     genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel("gemini-2.0-flash")
-    try:
-        resp = model.generate_content(
-            prompt,
-            generation_config=genai.types.GenerationConfig(
-                temperature=temperature,
-                max_output_tokens=1500,
-            ),
-        )
-        return resp.text.strip()
-    except Exception as e:
-        log.error(f"  Gemini error: {e}")
-        return ""
+    model = genai.GenerativeModel("gemini-1.5-flash-latest")
+    for attempt in range(max_retries):
+        try:
+            resp = model.generate_content(
+                prompt,
+                generation_config=genai.types.GenerationConfig(
+                    temperature=temperature,
+                    max_output_tokens=1500,
+                ),
+            )
+            return resp.text.strip()
+        except Exception as e:
+            err_str = str(e)
+            if "429" in err_str or "quota" in err_str.lower():
+                # Extraemos el retry_delay del mensaje si viene
+                delay_match = re.search(r"retry in (\d+(?:\.\d+)?)s", err_str)
+                wait = float(delay_match.group(1)) + 5 if delay_match else 60
+                if attempt < max_retries - 1:
+                    log.warning(f"  Rate limit 429 — esperando {wait:.0f}s (intento {attempt+1}/{max_retries})")
+                    time.sleep(wait)
+                else:
+                    log.error(f"  Rate limit agotado tras {max_retries} intentos. Saltando oferta.")
+                    return ""
+            else:
+                log.error(f"  Gemini error: {e}")
+                return ""
+    return ""
 
 def parse_json_from_response(text: str):
     """Extrae y parsea el primer bloque JSON de la respuesta."""
@@ -420,30 +450,22 @@ def main():
         send_diagnostic_email(today, len(raw_jobs), 0, 0)
         return
 
-    # ── PASO 2: EXTRAER TÍTULOS (solo el HTML ligero) ─────────────────────
-    # Necesitamos el título para el Agente 1. Usamos la página de oferta
-    # pero solo guardamos title+company en esta fase, sin procesar descripción todavía.
-    log.info("Extrayendo títulos para Agente 1...")
+    # ── PASO 2: CONSTRUIR LISTA DE TÍTULOS PARA AGENTE 1 ─────────────────
+    # Los títulos ya vienen del scraper — no hace falta visitar cada URL.
+    # Solo rellenamos con fallback los que lleguen sin título.
+    log.info("Preparando títulos para Agente 1 (sin peticiones extra)...")
     jobs_with_titles = []
     for job in new_jobs:
-        data = get_job_page(job["link"])
-        if data["title"]:
-            job.update(data)
-            jobs_with_titles.append({
-                "id":      job["id"],
-                "title":   data["title"],
-                "company": data["company"],
-            })
-        else:
-            # Si no podemos extraer título, lo pasamos directamente al Agente 2
-            # con un título genérico para no perderlo
-            job["title"]       = f"Oferta {job['id']}"
-            job["company"]     = "Empresa desconocida"
-            job["description"] = ""
-            jobs_with_titles.append({"id": job["id"], "title": job["title"], "company": job["company"]})
-        time.sleep(2)
+        if not job.get("title"):
+            job["title"]   = f"Oferta {job['id']}"
+            job["company"] = "Empresa desconocida"
+        jobs_with_titles.append({
+            "id":      job["id"],
+            "title":   job["title"],
+            "company": job.get("company", ""),
+        })
 
-    # Reconstruimos el dict de jobs por id para acceso rápido
+    # Dict por id para acceso rápido en pasos posteriores
     jobs_by_id = {j["id"]: j for j in new_jobs}
 
     # ── PASO 3: AGENTE 1 — FILTRO DE TÍTULOS (batch, 1 llamada) ──────────
