@@ -96,25 +96,49 @@ def scrape_linkedin_jobs():
 # --- ANÁLISIS IA (GEMINI 2.0 FLASH) ---
 def analyze_job_with_ia(profile, job_link):
     if not GEMINI_API_KEY: return None
+    
+    # Inicialización limpia del cliente
     client = genai.Client(api_key=GEMINI_API_KEY)
     
-    # Reducimos el perfil para enviar menos datos
-    summary = profile.get('summary', '')[:500]
+    # Perfil resumido para evitar saturación de tokens
+    resumen_perfil = profile.get('summary', '')[:400]
     
-    prompt = f"Analiza match entre este perfil: {summary} y esta oferta: {job_link}. Responde JSON con campos: classification, score, real_title, company, match_summary."
+    prompt = (
+        f"Analiza si este empleo {job_link} encaja con este perfil: {resumen_perfil}. "
+        "Responde SOLO un JSON: "
+        '{"classification": "VÁLIDA", "score": 9, "real_title": "...", "company": "...", "match_summary": "..."}'
+    )
 
-    for attempt in range(3):
+    # Reintentos por si acaso, pero el 404 se arregla con el nombre del modelo
+    for attempt in range(2):
         try:
-            # USAMOS 1.5 FLASH (MÁS ESTABLE EN TIER GRATUITO)
-            response = client.models.generate_content(model="gemini-1.5-flash", contents=prompt)
+            # EL CAMBIO CLAVE: "models/gemini-1.5-flash-latest"
+            response = client.models.generate_content(
+                model="models/gemini-1.5-flash-latest", 
+                contents=prompt
+            )
+            
+            if not response.text:
+                continue
+                
             clean_json = re.search(r'\{.*\}', response.text, re.DOTALL).group()
             return json.loads(clean_json)
+            
         except Exception as e:
-            if "429" in str(e):
-                log.warning(f"⚠️ Esperando 60s por cuota de Google...")
-                time.sleep(60) # Espera agresiva
+            if "404" in str(e):
+                log.error("❌ El modelo sigue dando 404. Probando alternativa...")
+                # Intento alternativo con el nombre corto
+                try:
+                    response = client.models.generate_content(model="gemini-1.5-flash", contents=prompt)
+                    clean_json = re.search(r'\{.*\}', response.text, re.DOTALL).group()
+                    return json.loads(clean_json)
+                except: break
+            elif "429" in str(e):
+                log.warning("⏳ Cuota agotada, esperando 30s...")
+                time.sleep(30)
             else:
-                return None
+                log.error(f"❌ Error inesperado: {e}")
+                break
     return None
 
 # --- EMAIL (CONSERVANDO TU ESTILO) ---
