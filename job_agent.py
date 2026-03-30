@@ -9,7 +9,7 @@ from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from pathlib import Path
-import google.generativeai as genai
+from groq import Groq
 
 # ── CONFIG ─────────────────────────────────────────────────────────────────
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -20,7 +20,7 @@ PROFILE_PATH = BASE_DIR / "profile.yaml"
 SEEN_PATH    = BASE_DIR / "seen_jobs.txt"
 QUEUE_PATH   = BASE_DIR / "application_queue.json"
 
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 GMAIL_USER     = os.environ.get("GMAIL_USER")
 GMAIL_PASS     = os.environ.get("GMAIL_APP_PASSWORD")
 EMAIL_TO       = os.environ.get("EMAIL_TO", GMAIL_USER)
@@ -37,11 +37,8 @@ SEARCH_QUERIES = [
     "Analytics",      # Analytics Manager, Head of Analytics, BI Lead...
     # ── Roles de liderazgo ──────────────────────────────────────────────
     "Head",           # Head of Data, Head of Engineering, Head of Product...
-    "Tech Lead",           # Tech Lead, Data Lead, AI Lead, Engineering Lead...
-    "Product Owner",
-    "Program Manager",
-    "Delivery Manager",
-    #"Director",       # Director of Data, Director of Engineering...
+    "Lead",           # Tech Lead, Data Lead, AI Lead, Engineering Lead...
+    "Director",       # Director of Data, Director of Engineering...
     "Manager",        # Engineering Manager, Program Manager, Product Manager...
     # ── Roles de arquitectura y producto ────────────────────────────────
     "Architect",      # Solutions Architect, Enterprise Architect, Data Architect...
@@ -155,33 +152,32 @@ def get_job_page(url: str) -> dict:
 
 # ── GEMINI HELPER ───────────────────────────────────────────────────────────
 def call_gemini(prompt: str, temperature: float = 0.1, max_retries: int = 3) -> str:
-    """Llama a Gemini con reintentos inteligentes ante rate limit (429)."""
-    genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel("gemini-1.5-flash-latest")
+    """Llama a Groq con reintentos inteligentes ante rate limit (429)."""
+    client = Groq(api_key=GROQ_API_KEY)
     for attempt in range(max_retries):
         try:
-            resp = model.generate_content(
-                prompt,
-                generation_config=genai.types.GenerationConfig(
-                    temperature=temperature,
-                    max_output_tokens=1500,
-                ),
+            resp = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[{"role": "user", "content": prompt}],
+                temperature=temperature,
+                max_tokens=1500,
             )
-            return resp.text.strip()
+            return resp.choices[0].message.content.strip()
         except Exception as e:
             err_str = str(e)
-            if "429" in err_str or "quota" in err_str.lower():
-                # Extraemos el retry_delay del mensaje si viene
-                delay_match = re.search(r"retry in (\d+(?:\.\d+)?)s", err_str)
-                wait = float(delay_match.group(1)) + 5 if delay_match else 60
+            if "429" in err_str or "rate_limit" in err_str.lower():
+                wait = 60
+                delay_match = re.search(r"retry after (\d+(?:\.\d+)?)", err_str, re.IGNORECASE)
+                if delay_match:
+                    wait = float(delay_match.group(1)) + 2
                 if attempt < max_retries - 1:
-                    log.warning(f"  Rate limit 429 — esperando {wait:.0f}s (intento {attempt+1}/{max_retries})")
+                    log.warning(f"  Rate limit — esperando {wait:.0f}s (intento {attempt+1}/{max_retries})")
                     time.sleep(wait)
                 else:
-                    log.error(f"  Rate limit agotado tras {max_retries} intentos. Saltando oferta.")
+                    log.error(f"  Rate limit agotado tras {max_retries} intentos. Saltando.")
                     return ""
             else:
-                log.error(f"  Gemini error: {e}")
+                log.error(f"  Groq error: {e}")
                 return ""
     return ""
 
