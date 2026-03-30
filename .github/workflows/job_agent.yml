@@ -8,7 +8,7 @@ on:
 jobs:
   run-job-agent:
     runs-on: ubuntu-latest
-    timeout-minutes: 60    # subimos de 30 a 60 — el Agente 2 con 30 candidatos × 15s = ~8 min, pero con retries puede llegar a 30
+    timeout-minutes: 60
 
     steps:
       - name: Checkout repo
@@ -27,18 +27,19 @@ jobs:
 
       - name: Run job agent
         env:
-          GROQ_API_KEY:         ${{ secrets.GROQ_API_KEY }}
-          GMAIL_USER:           ${{ secrets.GMAIL_USER }}
-          GMAIL_APP_PASSWORD:   ${{ secrets.GMAIL_APP_PASSWORD }}
-          EMAIL_TO:             ${{ secrets.EMAIL_TO }}
+          GROQ_API_KEY:       ${{ secrets.GROQ_API_KEY }}
+          GMAIL_USER:         ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          EMAIL_TO:           ${{ secrets.EMAIL_TO }}
         run: python job_agent.py
 
       - name: Commit updated state files
         run: |
           git config user.name  "job-agent-bot"
           git config user.email "bot@noreply.github.com"
-          git add seen_jobs.txt application_queue.json || true
-          git diff --staged --quiet || git commit -m "chore: update job agent state [skip ci]"
+          git add seen_jobs.txt application_queue.json logs/ || true
+          git diff --staged --quiet && exit 0
+          git pull --rebase origin main
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
