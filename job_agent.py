@@ -157,7 +157,7 @@ def call_gemini(prompt: str, temperature: float = 0.1, max_retries: int = 3) -> 
     for attempt in range(max_retries):
         try:
             resp = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
+                model="llama-3.1-8b-instant",
                 messages=[{"role": "user", "content": prompt}],
                 temperature=temperature,
                 max_tokens=1500,
