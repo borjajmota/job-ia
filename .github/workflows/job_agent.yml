@@ -37,9 +37,21 @@ jobs:
         run: |
           git config user.name  "job-agent-bot"
           git config user.email "bot@noreply.github.com"
+          
+          # 1. Añadimos los archivos modificados
           git add seen_jobs.txt application_queue.json logs/ || true
-          git diff --staged --quiet && exit 0
-          git pull --rebase origin main
-          git push
+          
+          # 2. Solo si hay cambios, hacemos commit y push
+          if ! git diff --staged --quiet; then
+            git commit -m "Update state: $(date +'%Y-%m-%d %H:%M')"
+            
+            # 3. Pull rebase para evitar conflictos si el repo cambió
+            git pull --rebase origin main
+            
+            # 4. Push final
+            git push
+          else
+            echo "No hay cambios en los archivos de estado. Nada que hacer."
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
