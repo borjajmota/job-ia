@@ -178,16 +178,17 @@ LISTA (ID | Título | Empresa):
 {titles_block}
 
 DESCARTAR SIEMPRE (independientemente del título):
-- Junior, Graduate, Intern, Becario, Trainee, Entry-level
-- Freelance, Autónomo, por proyecto
-- Ventas puras, Business Development, Account Executive, Sales Rep
-- RRHH, Legal, Finanzas, Contabilidad sin componente tech
+- Junior, Graduate, Intern, Becario, Trainee, Entry-level, o que pidan menos de 5 años de experiencia
+- Freelance, Autónomo, contrato por proyecto puntual
+- RRHH, Legal, Finanzas, Contabilidad sin componente tecnológico
 - Hostelería, Sanidad, Construcción, Inmobiliaria física, Logística operativa
-- Roles 100% hands-on sin liderazgo ni arquitectura (ej: iOS Developer, Mobile Engineer, QA Tester)
+- Roles 100% hands-on sin liderazgo ni arquitectura (iOS Developer, Mobile Developer, QA Tester, etc.)
+- Roles puramente operativos sin visión estratégica ni gestión de equipos
 
 INCLUIR SOLO SI:
 - El rol tiene componente de Data, AI, Cloud, Analytics, Architecture, Platform o Digital
 - O es un rol de liderazgo tech (Manager, Lead, Head, Director, Program Manager, Product Manager tech)
+- Requiere perfil Senior (5+ años de experiencia implícitos o explícitos en el título/empresa)
 - Empresas conocidas con roles ambiguos: incluir si hay duda
 
 TAREA:
@@ -261,13 +262,12 @@ Descripción: {job.get('description','')[:2500]}
 
 REGLAS DE DESCARTE AUTOMÁTICO (si se cumple alguna → DESCARTAR sin analizar más):
 - La oferta NO es tecnológica (Data/AI/Cloud/Software/Digital/Platform)
-- Es un rol Junior, Graduate, Intern, Becario, Trainee o Entry-level
-- Es Freelance, autónomo o por proyecto puntual
-- Es ventas puras (Sales, BDR, Account Executive) sin componente tech
+- Es un rol Junior, Graduate, Intern, Becario, Trainee, Entry-level, o requiere menos de 5 años de experiencia
+- Es Freelance, autónomo o contrato por proyecto puntual
 - Es RRHH, Legal, Finanzas sin componente tecnológico
 - Es un rol 100% hands-on de desarrollo sin responsabilidad de arquitectura, liderazgo o estrategia
-  (ej: iOS Developer, Mobile Developer, QA Engineer, Junior Developer)
-- El perfil de Borja está claramente sobrecualificado Y el rol no tiene camino de crecimiento
+  (ej: iOS Developer, Mobile Developer, QA Engineer, Junior Developer, Software Engineer sin liderazgo)
+- El perfil de Borja está claramente sobrecualificado Y el rol no tiene camino de crecimiento hacia liderazgo
 
 REGLAS DE SCORING (solo si supera el descarte):
 1. score_match (1-10): encaje real de skills, experiencia y aspiraciones con los requisitos del rol.
