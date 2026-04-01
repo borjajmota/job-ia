@@ -45,7 +45,6 @@ SEARCH_QUERIES = [
     "Platform", "Delivery", "Innovation", "Transformation",
 ]
 
-# GeoID 100958104 es la Comunidad de Madrid
 LINKEDIN_GEO_ID   = "100958104" 
 LINKEDIN_LOCATION = "Madrid%2C%20Spain"
 
@@ -67,8 +66,6 @@ def scrape_job_ids() -> dict:
 
     for q in SEARCH_QUERIES:
         log.info(f"🔎 Capturando IDs para [{q}]...")
-        
-        # Usamos subdominio ES para intentar forzar resultados locales
         url = (
             f"https://es.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search"
             f"?keywords={q.replace(' ','%20')}"
@@ -76,32 +73,27 @@ def scrape_job_ids() -> dict:
             f"&geoId={LINKEDIN_GEO_ID}"
             f"&f_TPR=r86400"
         )
-        
         try:
             res = requests.get(url, headers=headers, timeout=15)
             html = res.text
-
             ids = re.findall(r'jobPosting:(\d+)', html) or re.findall(r'data-id=["\'](\d+)["\']', html)
             titles = re.findall(r'class="[^"]*base-search-card__title[^"]*"[^>]*>(.*?)</h3', html, re.S)
             companies = re.findall(r'class="[^"]*base-search-card__subtitle[^"]*"[^>]*>.*?<a[^>]*>(.*?)</a', html, re.S)
 
-            titles = [re.sub(r'<[^<]+?>', '', t).strip() for t in titles]
-            companies = [re.sub(r'<[^<]+?>', '', c).strip() for c in companies]
-
             for i, jid in enumerate(ids):
                 if jid not in jobs:
-                    # Evitamos KeyError si las listas tienen longitudes distintas
+                    t = re.sub(r'<[^<]+?>', '', titles[i]).strip() if i < len(titles) else "Título no extraído"
+                    c = re.sub(r'<[^<]+?>', '', companies[i]).strip() if i < len(companies) else "Empresa no extraída"
                     jobs[jid] = {
                         "id": jid,
-                        "title": titles[i] if i < len(titles) else "Título por extraer",
-                        "company": companies[i] if i < len(companies) else "Empresa por extraer",
+                        "title": t,
+                        "company": c,
                         "link": f"https://www.linkedin.com/jobs/view/{jid}/"
                     }
-            log.info(f"   ✅ {len(ids)} IDs encontrados para [{q}]")
-            time.sleep(random.uniform(2, 4))
+            log.info(f"   ✅ {len(ids)} encontrados")
+            time.sleep(random.uniform(1, 3))
         except Exception as e:
-            log.error(f"  ❌ Error en búsqueda [{q}]: {e}")
-            
+            log.error(f"  ❌ Error en [{q}]: {e}")
     return jobs
 
 # ── GROQ HELPER ───────────────────────────────────────────────────────────────
@@ -114,3 +106,20 @@ def call_groq(prompt: str, temperature: float = 0.1, max_retries: int = 3) -> st
                 messages=[{"role": "user", "content": prompt}],
                 temperature=temperature,
                 max_tokens=2000,
+                timeout=30
+            )
+            return resp.choices[0].message.content.strip()
+        except Exception as e:
+            err = str(e)
+            if "429" in err or "rate_limit" in err.lower():
+                m = re.search(r'retry after (\d+(?:\.\d+)?)', err, re.I)
+                wait = float(m.group(1)) + 2 if m else 65
+                log.warning(f"  Rate limit: esperando {wait:.0f}s")
+                time.sleep(wait)
+            else:
+                log.error(f"  Groq error: {e}")
+                return ""
+    return ""
+
+def parse_json(text: str):
+    text = re.sub(r'^
