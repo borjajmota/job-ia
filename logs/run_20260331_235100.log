@@ -1,0 +1,125 @@
+2026-03-31 23:51:00,682 INFO =======================================================
+2026-03-31 23:51:00,682 INFO AGENTE DE EMPLEO — 31/03/2026 — 20260331_235100
+2026-03-31 23:51:00,683 INFO =======================================================
+2026-03-31 23:51:00,699 INFO  🔎 [Data] en Comunidad de Madrid
+2026-03-31 23:51:01,207 INFO     ✅ +10 nuevos (total acumulado: 10)
+2026-03-31 23:51:01,207 WARNING   ⚠️ Error en búsqueda [Data]: name 'random' is not defined
+2026-03-31 23:51:01,207 INFO  🔎 [AI] en Comunidad de Madrid
+2026-03-31 23:51:01,621 INFO     ✅ +7 nuevos (total acumulado: 17)
+2026-03-31 23:51:01,621 WARNING   ⚠️ Error en búsqueda [AI]: name 'random' is not defined
+2026-03-31 23:51:01,621 INFO  🔎 [Cloud] en Comunidad de Madrid
+2026-03-31 23:51:02,234 INFO     ✅ +9 nuevos (total acumulado: 26)
+2026-03-31 23:51:02,235 WARNING   ⚠️ Error en búsqueda [Cloud]: name 'random' is not defined
+2026-03-31 23:51:02,235 INFO  🔎 [Analytics] en Comunidad de Madrid
+2026-03-31 23:51:02,633 INFO     ✅ +3 nuevos (total acumulado: 29)
+2026-03-31 23:51:02,633 WARNING   ⚠️ Error en búsqueda [Analytics]: name 'random' is not defined
+2026-03-31 23:51:02,634 INFO  🔎 [Head] en Comunidad de Madrid
+2026-03-31 23:51:02,968 INFO     ✅ +9 nuevos (total acumulado: 38)
+2026-03-31 23:51:02,968 WARNING   ⚠️ Error en búsqueda [Head]: name 'random' is not defined
+2026-03-31 23:51:02,968 INFO  🔎 [Lead] en Comunidad de Madrid
+2026-03-31 23:51:03,384 INFO     ✅ +4 nuevos (total acumulado: 42)
+2026-03-31 23:51:03,384 WARNING   ⚠️ Error en búsqueda [Lead]: name 'random' is not defined
+2026-03-31 23:51:03,384 INFO  🔎 [Director] en Comunidad de Madrid
+2026-03-31 23:51:03,763 INFO     ✅ +0 nuevos (total acumulado: 42)
+2026-03-31 23:51:03,763 WARNING   ⚠️ Error en búsqueda [Director]: name 'random' is not defined
+2026-03-31 23:51:03,763 INFO  🔎 [Manager] en Comunidad de Madrid
+2026-03-31 23:51:04,198 INFO     ✅ +5 nuevos (total acumulado: 47)
+2026-03-31 23:51:04,198 WARNING   ⚠️ Error en búsqueda [Manager]: name 'random' is not defined
+2026-03-31 23:51:04,198 INFO  🔎 [Architect] en Comunidad de Madrid
+2026-03-31 23:51:04,477 INFO     ✅ +1 nuevos (total acumulado: 48)
+2026-03-31 23:51:04,477 WARNING   ⚠️ Error en búsqueda [Architect]: name 'random' is not defined
+2026-03-31 23:51:04,477 INFO  🔎 [Product] en Comunidad de Madrid
+2026-03-31 23:51:04,886 INFO     ✅ +6 nuevos (total acumulado: 54)
+2026-03-31 23:51:04,886 WARNING   ⚠️ Error en búsqueda [Product]: name 'random' is not defined
+2026-03-31 23:51:04,886 INFO  🔎 [Governance] en Comunidad de Madrid
+2026-03-31 23:51:05,298 INFO     ✅ +6 nuevos (total acumulado: 60)
+2026-03-31 23:51:05,299 WARNING   ⚠️ Error en búsqueda [Governance]: name 'random' is not defined
+2026-03-31 23:51:05,299 INFO  🔎 [Platform] en Comunidad de Madrid
+2026-03-31 23:51:05,741 INFO     ✅ +8 nuevos (total acumulado: 68)
+2026-03-31 23:51:05,741 WARNING   ⚠️ Error en búsqueda [Platform]: name 'random' is not defined
+2026-03-31 23:51:05,741 INFO  🔎 [Delivery] en Comunidad de Madrid
+2026-03-31 23:51:06,117 INFO     ✅ +5 nuevos (total acumulado: 73)
+2026-03-31 23:51:06,118 WARNING   ⚠️ Error en búsqueda [Delivery]: name 'random' is not defined
+2026-03-31 23:51:06,118 INFO  🔎 [Innovation] en Comunidad de Madrid
+2026-03-31 23:51:06,554 INFO     ✅ +4 nuevos (total acumulado: 77)
+2026-03-31 23:51:06,554 WARNING   ⚠️ Error en búsqueda [Innovation]: name 'random' is not defined
+2026-03-31 23:51:06,554 INFO  🔎 [Transformation] en Comunidad de Madrid
+2026-03-31 23:51:06,976 INFO     ✅ +6 nuevos (total acumulado: 83)
+2026-03-31 23:51:06,976 WARNING   ⚠️ Error en búsqueda [Transformation]: name 'random' is not defined
+2026-03-31 23:51:06,976 INFO 🚀 Scraping finalizado. 83 ofertas únicas para analizar.
+2026-03-31 23:51:06,978 INFO Log scraping: scraping_20260331_235100.json
+2026-03-31 23:51:06,978 INFO Nuevos: 83 de 83 scrapeados
+2026-03-31 23:51:06,978 INFO   [Agente 1] Filtrando 83 títulos...
+2026-03-31 23:51:07,557 INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-31 23:51:07,571 INFO   [Agente 1] Raw (200 chars): {"candidates": ["4393289889", "4393504581", "4383793671", "4393525006", "4393519358", "4393509212", "4393289889", "4393549459", "4383283189", "4393512488", "4393560695", "4393525006", "4393519358", "4
+2026-03-31 23:51:07,571 INFO   [Agente 1] OK — 29 candidatos
+2026-03-31 23:51:07,572 INFO Log Agente 1: agent1_20260331_235100.json
+2026-03-31 23:51:07,572 INFO Candidatos para Agente 2: 14
+2026-03-31 23:51:07,572 INFO   [Agente 2] Paid Social Specialist @ Seed | B Corp ™
+2026-03-31 23:51:08,233 INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-03-31 23:51:08,234 WARNING   Rate limit — esperando 65s (intento 1/3)
+2026-03-31 23:52:13,640 INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-31 23:52:13,641 INFO     → MATICES (score 5)
+2026-03-31 23:52:28,641 INFO   [Agente 2] Manager – AI Productivity Engineer @ Virgin Atlantic
+2026-03-31 23:52:29,336 INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-03-31 23:52:29,336 WARNING   Rate limit — esperando 65s (intento 1/3)
+2026-03-31 23:53:34,729 INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-31 23:53:34,730 INFO     → MATICES (score 8)
+2026-03-31 23:53:49,730 INFO   [Agente 2] Applications Lead @ Elekta
+2026-03-31 23:53:50,414 INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-03-31 23:53:50,414 WARNING   Rate limit — esperando 65s (intento 1/3)
+2026-03-31 23:54:55,926 INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-31 23:54:55,927 INFO     → MATICES (score 6)
+2026-03-31 23:55:10,927 INFO   [Agente 2] Head of Membership Proposition @ Membership Bespoke
+2026-03-31 23:55:11,998 INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-31 23:55:11,999 INFO     → MATICES (score 6)
+2026-03-31 23:55:26,999 INFO   [Agente 2] Head of Membership Loyalty @ Membership Bespoke
+2026-03-31 23:55:27,677 INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-03-31 23:55:27,677 WARNING   Rate limit — esperando 65s (intento 1/3)
+2026-03-31 23:56:33,223 INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-31 23:56:33,223 INFO     → MATICES (score 6)
+2026-03-31 23:56:48,224 INFO   [Agente 2] Head of Marketing @ Better Placed Ltd - A Sunday Times Top 10 Employer!
+2026-03-31 23:56:49,160 INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-31 23:56:49,161 INFO     → DESCARTADA: La oferta NO es tecnológica (Data/AI/Cloud/Software/Digital/Platform)
+2026-03-31 23:57:04,161 INFO   [Agente 2] Content Specialist @ Ski Safari
+2026-03-31 23:57:04,811 INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-03-31 23:57:04,812 WARNING   Rate limit — esperando 65s (intento 1/3)
+2026-03-31 23:58:10,365 INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-31 23:58:10,366 INFO     → DESCARTADA: La oferta NO es tecnológica (Data/AI/Cloud/Software/Digital/Platform)
+2026-03-31 23:58:25,366 INFO   [Agente 2] Project Manager - Data Analytics (Supply Chain) @ Siemens Healthineers
+2026-03-31 23:58:26,347 INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-31 23:58:26,348 INFO     → MATICES (score 8)
+2026-03-31 23:58:41,348 INFO   [Agente 2] Head of Membership Products @ Membership Bespoke
+2026-03-31 23:58:41,981 INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-03-31 23:58:41,982 WARNING   Rate limit — esperando 65s (intento 1/3)
+2026-03-31 23:59:47,439 INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-31 23:59:47,440 INFO     → MATICES (score 6)
+2026-04-01 00:00:02,440 INFO   [Agente 2] Head of Operations @ SENATE GRAND PRIX
+2026-04-01 00:00:03,319 INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-04-01 00:00:03,320 WARNING   Rate limit — esperando 65s (intento 1/3)
+2026-04-01 00:01:08,777 INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-01 00:01:08,777 INFO     → DESCARTADA: La oferta NO es tecnológica (Data/AI/Cloud/Software/Digital/Platform)
+2026-04-01 00:01:23,778 INFO   [Agente 2] Financial Planning and Analysis Manager @ ZRG Ignata Finance
+2026-04-01 00:01:24,366 INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-04-01 00:01:24,366 WARNING   Rate limit — esperando 65s (intento 1/3)
+2026-04-01 00:02:29,873 INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-01 00:02:29,874 INFO     → MATICES (score 6)
+2026-04-01 00:02:44,874 INFO   [Agente 2] Production Engineer @ Rolls-Royce Power Systems
+2026-04-01 00:02:45,593 INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-04-01 00:02:45,594 WARNING   Rate limit — esperando 65s (intento 1/3)
+2026-04-01 00:03:51,032 INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-01 00:03:51,032 INFO     → DESCARTADA: El rol es un rol Junior de producción en una empresa no tecnológica, sin componente de liderazgo o arquitectura.
+2026-04-01 00:04:06,033 INFO   [Agente 2] Production Engineer @ Rolls-Royce
+2026-04-01 00:04:06,713 INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-04-01 00:04:06,713 WARNING   Rate limit — esperando 65s (intento 1/3)
+2026-04-01 00:05:12,302 INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-01 00:05:12,303 INFO     → DESCARTADA: El rol es un rol Junior de producción en una empresa no tecnológica, sin componente de liderazgo o arquitectura.
+2026-04-01 00:05:27,304 INFO   [Agente 2] ABAP Technical Lead @ Capgemini
+2026-04-01 00:05:28,015 INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-04-01 00:05:28,015 WARNING   Rate limit — esperando 65s (intento 1/3)
+2026-04-01 00:06:33,486 INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-01 00:06:33,487 INFO     → MATICES (score 6.9)
+2026-04-01 00:06:48,488 INFO Log resultados: results_20260331_235100.json
+2026-04-01 00:06:48,489 INFO Resultado — Válidas: 0, Matices: 9
+2026-04-01 00:06:49,199 INFO Email enviado a borja.jmota@gmail.com
+2026-04-01 00:06:49,199 INFO FIN — 20260331_235100
