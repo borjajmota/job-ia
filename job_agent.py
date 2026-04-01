@@ -45,10 +45,8 @@ SEARCH_QUERIES = [
     "Platform", "Delivery", "Innovation", "Transformation",
 ]
 
-# ID 100958104 es inequívoco para "Comunidad de Madrid, España"
-LINKEDIN_GEO_ID   = "100958104" 
 LINKEDIN_LOCATION = "Comunidad%20de%20Madrid%2C%20Espa%C3%B1a"
-
+LINKEDIN_GEO_ID   = "100958104"  # GeoID Comunidad de Madrid — inequívoco, no confunde con Madrid USA/UK
 # ── CARGA DE DATOS ────────────────────────────────────────────────────────────
 def load_data():
     profile = yaml.safe_load(PROFILE_PATH.read_text(encoding="utf-8"))
@@ -58,38 +56,54 @@ def load_data():
 
 # ── SCRAPING ──────────────────────────────────────────────────────────────────
 def scrape_job_ids() -> dict:
-    jobs = {}
+    """
+    Devuelve dict {job_id: {id, title, company, link}} con IDs únicos.
+    Madrid + 50km, últimas 24h, deduplicado entre búsquedas.
+    """
+    jobs    = {}
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Referer":    "https://www.google.com/",
     }
-
     for q in SEARCH_QUERIES:
-        log.info(f"🔎 Capturando IDs para [{q}]...")
-        
-        # URL básica de Madrid
+        log.info(f"  [{q}] @ Comunidad de Madrid, España")
         url = (
             f"https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search"
             f"?keywords={q.replace(' ','%20')}"
-            f"&location=Madrid%2C%20Spain"
-            f"&geoId=100958104"
+            f"&location={LINKEDIN_LOCATION}"
+            f"&geoId={LINKEDIN_GEO_ID}"
             f"&f_TPR=r86400"
+            f"&start=0"
         )
-        
         try:
-            res = requests.get(url, headers=headers, timeout=15)
-            # Extraemos IDs a lo bruto, sin filtros de texto que puedan fallar
-            ids = re.findall(r'jobPosting:(\d+)', res.text) or re.findall(r'data-id=["\'](\d+)["\']', res.text)
-            
-            for jid in ids:
+            res  = requests.get(url, headers=headers, timeout=12)
+            html = res.text
+
+            ids       = re.findall(r'jobPosting:(\d+)', html)
+            if not ids:
+                ids   = re.findall(r'data-id=["\'](\d+)["\']', html)
+
+            titles    = re.findall(r'class="[^"]*base-search-card__title[^"]*"[^>]*>(.*?)</h3', html, re.S)
+            companies = re.findall(r'class="[^"]*base-search-card__subtitle[^"]*"[^>]*>.*?<a[^>]*>(.*?)</a', html, re.S)
+            titles    = [re.sub(r'<[^<]+?>', '', t).strip() for t in titles]
+            companies = [re.sub(r'<[^<]+?>', '', c).strip() for c in companies]
+
+            added = 0
+            for i, jid in enumerate(ids):
                 if jid not in jobs:
                     jobs[jid] = {
-                        "id": jid,
-                        "link": f"https://www.linkedin.com/jobs/view/{jid}/"
+                        "id":      jid,
+                        "title":   titles[i]    if i < len(titles)    else "",
+                        "company": companies[i] if i < len(companies) else "",
+                        "link":    f"https://www.linkedin.com/jobs/view/{jid}/",
                     }
-            log.info(f"   ✅ {len(ids)} IDs encontrados para [{q}]")
+                    added += 1
+            log.info(f"    +{added} nuevos (total: {len(jobs)})")
+            time.sleep(3)
         except Exception as e:
-            log.error(f"  ❌ Error: {e}")
-            
+            log.warning(f"  Error en [{q}]: {e}")
+
+    log.info(f"Total IDs únicos scrapeados: {len(jobs)}")
     return jobs
 
 # ── GROQ HELPER ───────────────────────────────────────────────────────────────
@@ -147,8 +161,8 @@ def agent1_filter_titles(jobs: dict, profile: dict) -> list:
     summary       = profile.get("summary", "")[:400]
 
     titles_block = "\n".join(
-        f"{j.get('id', 'ID-Error')} | {j.get('title', 'Sin Título')} | {j.get('company', 'Sin Empresa')}"
-        for j in jobs_list
+        f'{j["id"]} | {j["title"]} | {j["company"]}'
+        for j in jobs.values()
     )
 
     prompt = f"""Eres un filtro de ofertas de empleo para un profesional senior de Data & AI en Madrid.
@@ -341,7 +355,7 @@ def build_email_html(valid: list, caveats: list, today: str, n_scraped: int, n_c
     <div>
       <div style="font-size:16px;font-weight:600;color:#111;">Empleos del día</div>
       <div style="font-size:11px;color:#9ca3af;margin-top:2px;">
-        {today} &bull; Madrid &bull; {n_scraped} vistas &bull; {n_candidates} analizadas
+        {today} &bull; Comunidad de Madrid &bull; {n_scraped} vistas &bull; {n_candidates} analizadas
       </div>
     </div>
     <div style="display:flex;gap:16px;text-align:center;">
