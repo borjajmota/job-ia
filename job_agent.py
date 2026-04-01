@@ -22,6 +22,7 @@ GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 GMAIL_USER   = os.environ.get("GMAIL_USER")
 GMAIL_PASS   = os.environ.get("GMAIL_APP_PASSWORD")
 EMAIL_TO     = os.environ.get("EMAIL_TO", GMAIL_USER)
+LI_AT_COOKIE = os.environ.get("LI_AT_COOKIE", "")  # Cookie de sesión LinkedIn — ancla geográfica
 
 RUN_ID       = datetime.now().strftime("%Y%m%d_%H%M%S")
 MAX_AGENT2   = 30
@@ -62,8 +63,10 @@ def scrape_job_ids() -> dict:
     """
     jobs    = {}
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        "Referer":    "https://www.google.com/",
+        "User-Agent":  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Cookie":      f"li_at={LI_AT_COOKIE}" if LI_AT_COOKIE else "",
+        "Referer":     "https://www.linkedin.com/jobs/search/",
+        "X-Li-Lang":   "es_ES",
     }
     for q in SEARCH_QUERIES:
         log.info(f"  [{q}] @ Comunidad de Madrid, España")
@@ -72,6 +75,7 @@ def scrape_job_ids() -> dict:
             f"?keywords={q.replace(' ','%20')}"
             f"&location={LINKEDIN_LOCATION}"
             f"&geoId={LINKEDIN_GEO_ID}"
+            f"&countryCode=es"
             f"&f_TPR=r86400"
             f"&start=0"
         )
@@ -88,17 +92,29 @@ def scrape_job_ids() -> dict:
             titles    = [re.sub(r'<[^<]+?>', '', t).strip() for t in titles]
             companies = [re.sub(r'<[^<]+?>', '', c).strip() for c in companies]
 
-            added = 0
+            # Extraemos ubicaciones para filtrar resultados fuera de España
+            locations_raw = re.findall(
+                r'class="[^"]*job-search-card__location[^"]*"[^>]*>(.*?)</span>', html, re.S
+            )
+            locations = [re.sub(r'<[^<]+?>', '', l).strip() for l in locations_raw]
+
+            added = skipped = 0
             for i, jid in enumerate(ids):
                 if jid not in jobs:
+                    loc = locations[i] if i < len(locations) else ""
+                    # Descartar si la ubicación menciona UK, United Kingdom, England, etc.
+                    if any(x in loc for x in ["United Kingdom", "England", "UK,", ", UK", "London", "Manchester", "Birmingham"]):
+                        skipped += 1
+                        continue
                     jobs[jid] = {
-                        "id":      jid,
-                        "title":   titles[i]    if i < len(titles)    else "",
-                        "company": companies[i] if i < len(companies) else "",
-                        "link":    f"https://www.linkedin.com/jobs/view/{jid}/",
+                        "id":       jid,
+                        "title":    titles[i]    if i < len(titles)    else "",
+                        "company":  companies[i] if i < len(companies) else "",
+                        "location": loc,
+                        "link":     f"https://www.linkedin.com/jobs/view/{jid}/",
                     }
                     added += 1
-            log.info(f"    +{added} nuevos (total: {len(jobs)})")
+            log.info(f"    +{added} nuevos, {skipped} filtrados fuera de España (total: {len(jobs)})")
             time.sleep(3)
         except Exception as e:
             log.warning(f"  Error en [{q}]: {e}")
