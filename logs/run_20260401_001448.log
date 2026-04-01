@@ -1,0 +1,178 @@
+2026-04-01 00:14:48,012 INFO =======================================================
+2026-04-01 00:14:48,012 INFO AGENTE DE EMPLEO — 01/04/2026 — 20260401_001448
+2026-04-01 00:14:48,013 INFO =======================================================
+2026-04-01 00:14:48,039 INFO  🔎 Buscando [Data]...
+2026-04-01 00:14:48,471 WARNING    🚫 Filtrada oferta de fuera: brighton, england, united kingdom (ID: 4392417434)
+2026-04-01 00:14:48,471 WARNING    🚫 Filtrada oferta de fuera: west sussex, england, united kingdom (ID: 4392479745)
+2026-04-01 00:14:48,471 WARNING    🚫 Filtrada oferta de fuera: cranleigh, england, united kingdom (ID: 4392412176)
+2026-04-01 00:14:48,471 WARNING    🚫 Filtrada oferta de fuera: hove, england, united kingdom (ID: 4395854868)
+2026-04-01 00:14:48,471 WARNING    🚫 Filtrada oferta de fuera: polegate, england, united kingdom (ID: 4393552866)
+2026-04-01 00:14:48,471 WARNING    🚫 Filtrada oferta de fuera: brighton, england, united kingdom (ID: 4392463771)
+2026-04-01 00:14:48,471 WARNING    🚫 Filtrada oferta de fuera: lewes, england, united kingdom (ID: 4393271425)
+2026-04-01 00:14:48,471 WARNING    🚫 Filtrada oferta de fuera: brighton, england, united kingdom (ID: 4393289889)
+2026-04-01 00:14:48,471 WARNING    🚫 Filtrada oferta de fuera: crawley, england, united kingdom (ID: 4395663622)
+2026-04-01 00:14:48,471 WARNING    🚫 Filtrada oferta de fuera: worthing, england, united kingdom (ID: 4392481024)
+2026-04-01 00:14:48,471 INFO     ✅ +0 locales encontradas.
+2026-04-01 00:14:51,472 INFO  🔎 Buscando [AI]...
+2026-04-01 00:14:51,860 WARNING    🚫 Filtrada oferta de fuera: brighton, england, united kingdom (ID: 4392417434)
+2026-04-01 00:14:51,860 WARNING    🚫 Filtrada oferta de fuera: east grinstead, england, united kingdom (ID: 4393599231)
+2026-04-01 00:14:51,860 WARNING    🚫 Filtrada oferta de fuera: crawley, england, united kingdom (ID: 4393504581)
+2026-04-01 00:14:51,860 WARNING    🚫 Filtrada oferta de fuera: brighton, england, united kingdom (ID: 4393289889)
+2026-04-01 00:14:51,860 WARNING    🚫 Filtrada oferta de fuera: brighton, england, united kingdom (ID: 4392492316)
+2026-04-01 00:14:51,860 WARNING    🚫 Filtrada oferta de fuera: shoreham-by-sea, england, united kingdom (ID: 4392484470)
+2026-04-01 00:14:51,860 WARNING    🚫 Filtrada oferta de fuera: eastbourne, england, united kingdom (ID: 4392434744)
+2026-04-01 00:14:51,861 WARNING    🚫 Filtrada oferta de fuera: brighton, england, united kingdom (ID: 4392431196)
+2026-04-01 00:14:51,861 WARNING    🚫 Filtrada oferta de fuera: brighton, england, united kingdom (ID: 4392133777)
+2026-04-01 00:14:51,861 WARNING    🚫 Filtrada oferta de fuera: brighton, england, united kingdom (ID: 4392482095)
+2026-04-01 00:14:51,861 INFO     ✅ +0 locales encontradas.
+2026-04-01 00:14:54,861 INFO  🔎 Buscando [Cloud]...
+2026-04-01 00:14:55,237 WARNING    🚫 Filtrada oferta de fuera: worthing, england, united kingdom (ID: 4392460421)
+2026-04-01 00:14:55,237 WARNING    🚫 Filtrada oferta de fuera: greater brighton and hove area (ID: 4393569350)
+2026-04-01 00:14:55,237 WARNING    🚫 Filtrada oferta de fuera: crawley, england, united kingdom (ID: 4393504581)
+2026-04-01 00:14:55,237 WARNING    🚫 Filtrada oferta de fuera: hove, england, united kingdom (ID: 4393549459)
+2026-04-01 00:14:55,237 WARNING    🚫 Filtrada oferta de fuera: crawley, england, united kingdom (ID: 4392194687)
+2026-04-01 00:14:55,237 WARNING    🚫 Filtrada oferta de fuera: crawley, england, united kingdom (ID: 4383793671)
+2026-04-01 00:14:55,237 WARNING    🚫 Filtrada oferta de fuera: east sussex, england, united kingdom (ID: 4393534039)
+2026-04-01 00:14:55,237 WARNING    🚫 Filtrada oferta de fuera: worthing, england, united kingdom (ID: 4392467249)
+2026-04-01 00:14:55,237 WARNING    🚫 Filtrada oferta de fuera: crawley, england, united kingdom (ID: 4343741577)
+2026-04-01 00:14:55,237 WARNING    🚫 Filtrada oferta de fuera: brighton, england, united kingdom (ID: 4393597404)
+2026-04-01 00:14:55,237 INFO     ✅ +0 locales encontradas.
+2026-04-01 00:14:58,238 INFO  🔎 Buscando [Analytics]...
+2026-04-01 00:14:58,635 WARNING    🚫 Filtrada oferta de fuera: cranleigh, england, united kingdom (ID: 4392412176)
+2026-04-01 00:14:58,635 WARNING    🚫 Filtrada oferta de fuera: brighton, england, united kingdom (ID: 4392417434)
+2026-04-01 00:14:58,635 WARNING    🚫 Filtrada oferta de fuera: west sussex, england, united kingdom (ID: 4392479745)
+2026-04-01 00:14:58,635 WARNING    🚫 Filtrada oferta de fuera: lewes, england, united kingdom (ID: 4393271425)
+2026-04-01 00:14:58,635 WARNING    🚫 Filtrada oferta de fuera: brighton, england, united kingdom (ID: 4392463771)
+2026-04-01 00:14:58,635 WARNING    🚫 Filtrada oferta de fuera: cranleigh, england, united kingdom (ID: 4392419139)
+2026-04-01 00:14:58,635 WARNING    🚫 Filtrada oferta de fuera: brighton, england, united kingdom (ID: 4395673502)
+2026-04-01 00:14:58,635 WARNING    🚫 Filtrada oferta de fuera: crawley, england, united kingdom (ID: 4395663622)
+2026-04-01 00:14:58,635 WARNING    🚫 Filtrada oferta de fuera: crawley, england, united kingdom (ID: 4383283189)
+2026-04-01 00:14:58,635 WARNING    🚫 Filtrada oferta de fuera: hove, england, united kingdom (ID: 4393549459)
+2026-04-01 00:14:58,635 INFO     ✅ +0 locales encontradas.
+2026-04-01 00:15:01,636 INFO  🔎 Buscando [Head]...
+2026-04-01 00:15:02,027 WARNING    🚫 Filtrada oferta de fuera: lingfield, england, united kingdom (ID: 4393560695)
+2026-04-01 00:15:02,027 WARNING    🚫 Filtrada oferta de fuera: east grinstead, england, united kingdom (ID: 4393512488)
+2026-04-01 00:15:02,027 WARNING    🚫 Filtrada oferta de fuera: east grinstead, england, united kingdom (ID: 4393525006)
+2026-04-01 00:15:02,028 WARNING    🚫 Filtrada oferta de fuera: east grinstead, england, united kingdom (ID: 4393519358)
+2026-04-01 00:15:02,028 WARNING    🚫 Filtrada oferta de fuera: lewes, england, united kingdom (ID: 4393271425)
+2026-04-01 00:15:02,028 WARNING    🚫 Filtrada oferta de fuera: brighton, england, united kingdom (ID: 4393509212)
+2026-04-01 00:15:02,028 WARNING    🚫 Filtrada oferta de fuera: polegate, england, united kingdom (ID: 4392563486)
+2026-04-01 00:15:02,028 WARNING    🚫 Filtrada oferta de fuera: hove, england, united kingdom (ID: 4392195876)
+2026-04-01 00:15:02,028 WARNING    🚫 Filtrada oferta de fuera: west sussex, england, united kingdom (ID: 4381735653)
+2026-04-01 00:15:02,028 WARNING    🚫 Filtrada oferta de fuera: crawley, england, united kingdom (ID: 4393556881)
+2026-04-01 00:15:02,028 INFO     ✅ +0 locales encontradas.
+2026-04-01 00:15:05,028 INFO  🔎 Buscando [Lead]...
+2026-04-01 00:15:05,481 WARNING    🚫 Filtrada oferta de fuera: worthing, england, united kingdom (ID: 4393542858)
+2026-04-01 00:15:05,481 WARNING    🚫 Filtrada oferta de fuera: crawley, england, united kingdom (ID: 4383790773)
+2026-04-01 00:15:05,481 WARNING    🚫 Filtrada oferta de fuera: crawley, england, united kingdom (ID: 4383793671)
+2026-04-01 00:15:05,481 WARNING    🚫 Filtrada oferta de fuera: west sussex, england, united kingdom (ID: 4381735653)
+2026-04-01 00:15:05,481 WARNING    🚫 Filtrada oferta de fuera: hove, england, united kingdom (ID: 4392195876)
+2026-04-01 00:15:05,481 WARNING    🚫 Filtrada oferta de fuera: shoreham-by-sea, england, united kingdom (ID: 4390908797)
+2026-04-01 00:15:05,481 WARNING    🚫 Filtrada oferta de fuera: crawley, england, united kingdom (ID: 4385361224)
+2026-04-01 00:15:05,481 WARNING    🚫 Filtrada oferta de fuera: east grinstead, england, united kingdom (ID: 4393512488)
+2026-04-01 00:15:05,481 WARNING    🚫 Filtrada oferta de fuera: lewes, england, united kingdom (ID: 4393271425)
+2026-04-01 00:15:05,481 WARNING    🚫 Filtrada oferta de fuera: east grinstead, england, united kingdom (ID: 4393519358)
+2026-04-01 00:15:05,481 INFO     ✅ +0 locales encontradas.
+2026-04-01 00:15:08,481 INFO  🔎 Buscando [Director]...
+2026-04-01 00:15:08,850 WARNING    🚫 Filtrada oferta de fuera: lingfield, england, united kingdom (ID: 4393560695)
+2026-04-01 00:15:08,850 WARNING    🚫 Filtrada oferta de fuera: east grinstead, england, united kingdom (ID: 4393512488)
+2026-04-01 00:15:08,850 WARNING    🚫 Filtrada oferta de fuera: lewes, england, united kingdom (ID: 4393271425)
+2026-04-01 00:15:08,850 WARNING    🚫 Filtrada oferta de fuera: east grinstead, england, united kingdom (ID: 4393519358)
+2026-04-01 00:15:08,850 WARNING    🚫 Filtrada oferta de fuera: brighton, england, united kingdom (ID: 4393509212)
+2026-04-01 00:15:08,850 WARNING    🚫 Filtrada oferta de fuera: east grinstead, england, united kingdom (ID: 4393525006)
+2026-04-01 00:15:08,851 WARNING    🚫 Filtrada oferta de fuera: polegate, england, united kingdom (ID: 4392563486)
+2026-04-01 00:15:08,851 WARNING    🚫 Filtrada oferta de fuera: west sussex, england, united kingdom (ID: 4381735653)
+2026-04-01 00:15:08,851 WARNING    🚫 Filtrada oferta de fuera: hove, england, united kingdom (ID: 4392195876)
+2026-04-01 00:15:08,851 WARNING    🚫 Filtrada oferta de fuera: eastbourne, england, united kingdom (ID: 4392401445)
+2026-04-01 00:15:08,851 INFO     ✅ +0 locales encontradas.
+2026-04-01 00:15:11,851 INFO  🔎 Buscando [Manager]...
+2026-04-01 00:15:12,313 WARNING    🚫 Filtrada oferta de fuera: lingfield, england, united kingdom (ID: 4393560695)
+2026-04-01 00:15:12,313 WARNING    🚫 Filtrada oferta de fuera: brighton, england, united kingdom (ID: 4393595932)
+2026-04-01 00:15:12,313 WARNING    🚫 Filtrada oferta de fuera: burgess hill, england, united kingdom (ID: 4381767420)
+2026-04-01 00:15:12,313 WARNING    🚫 Filtrada oferta de fuera: crawley, england, united kingdom (ID: 4392457444)
+2026-04-01 00:15:12,313 WARNING    🚫 Filtrada oferta de fuera: east grinstead, england, united kingdom (ID: 4393512488)
+2026-04-01 00:15:12,313 WARNING    🚫 Filtrada oferta de fuera: lewes, england, united kingdom (ID: 4393271425)
+2026-04-01 00:15:12,313 WARNING    🚫 Filtrada oferta de fuera: west sussex, england, united kingdom (ID: 4381735653)
+2026-04-01 00:15:12,313 WARNING    🚫 Filtrada oferta de fuera: copthorne, england, united kingdom (ID: 4393570472)
+2026-04-01 00:15:12,313 WARNING    🚫 Filtrada oferta de fuera: worthing, england, united kingdom (ID: 4364744094)
+2026-04-01 00:15:12,313 WARNING    🚫 Filtrada oferta de fuera: brighton, england, united kingdom (ID: 4392431196)
+2026-04-01 00:15:12,313 INFO     ✅ +0 locales encontradas.
+2026-04-01 00:15:15,313 INFO  🔎 Buscando [Architect]...
+2026-04-01 00:15:15,645 WARNING    🚫 Filtrada oferta de fuera: crawley, england, united kingdom (ID: 4343651834)
+2026-04-01 00:15:15,645 WARNING    🚫 Filtrada oferta de fuera: crawley, england, united kingdom (ID: 4343741577)
+2026-04-01 00:15:15,645 INFO     ✅ +0 locales encontradas.
+2026-04-01 00:15:18,645 INFO  🔎 Buscando [Product]...
+2026-04-01 00:15:19,052 WARNING    🚫 Filtrada oferta de fuera: east sussex, england, united kingdom (ID: 4393900127)
+2026-04-01 00:15:19,052 WARNING    🚫 Filtrada oferta de fuera: brighton, england, united kingdom (ID: 4345682175)
+2026-04-01 00:15:19,052 WARNING    🚫 Filtrada oferta de fuera: east grinstead, england, united kingdom (ID: 4393545191)
+2026-04-01 00:15:19,052 WARNING    🚫 Filtrada oferta de fuera: lewes, england, united kingdom (ID: 4393271425)
+2026-04-01 00:15:19,052 WARNING    🚫 Filtrada oferta de fuera: east grinstead, england, united kingdom (ID: 4392439008)
+2026-04-01 00:15:19,053 WARNING    🚫 Filtrada oferta de fuera: east grinstead, england, united kingdom (ID: 4393512488)
+2026-04-01 00:15:19,053 WARNING    🚫 Filtrada oferta de fuera: east grinstead, england, united kingdom (ID: 4393525006)
+2026-04-01 00:15:19,053 WARNING    🚫 Filtrada oferta de fuera: east grinstead, england, united kingdom (ID: 4393519358)
+2026-04-01 00:15:19,053 WARNING    🚫 Filtrada oferta de fuera: cranleigh, england, united kingdom (ID: 4041978682)
+2026-04-01 00:15:19,053 WARNING    🚫 Filtrada oferta de fuera: shoreham-by-sea, england, united kingdom (ID: 4393510700)
+2026-04-01 00:15:19,053 INFO     ✅ +0 locales encontradas.
+2026-04-01 00:15:22,053 INFO  🔎 Buscando [Governance]...
+2026-04-01 00:15:22,488 WARNING    🚫 Filtrada oferta de fuera: horsham, england, united kingdom (ID: 4392467350)
+2026-04-01 00:15:22,488 WARNING    🚫 Filtrada oferta de fuera: brighton, england, united kingdom (ID: 4392441539)
+2026-04-01 00:15:22,488 WARNING    🚫 Filtrada oferta de fuera: brighton, england, united kingdom (ID: 4395673502)
+2026-04-01 00:15:22,488 WARNING    🚫 Filtrada oferta de fuera: crawley, england, united kingdom (ID: 4393556881)
+2026-04-01 00:15:22,488 WARNING    🚫 Filtrada oferta de fuera: thakeham, england, united kingdom (ID: 4393572208)
+2026-04-01 00:15:22,488 WARNING    🚫 Filtrada oferta de fuera: brighton, england, united kingdom (ID: 4392446733)
+2026-04-01 00:15:22,488 WARNING    🚫 Filtrada oferta de fuera: worthing, england, united kingdom (ID: 4393558180)
+2026-04-01 00:15:22,488 WARNING    🚫 Filtrada oferta de fuera: brighton, england, united kingdom (ID: 4392400629)
+2026-04-01 00:15:22,489 WARNING    🚫 Filtrada oferta de fuera: lewes, england, united kingdom (ID: 4393561020)
+2026-04-01 00:15:22,489 WARNING    🚫 Filtrada oferta de fuera: west sussex, england, united kingdom (ID: 4392479745)
+2026-04-01 00:15:22,489 INFO     ✅ +0 locales encontradas.
+2026-04-01 00:15:25,489 INFO  🔎 Buscando [Platform]...
+2026-04-01 00:15:25,909 WARNING    🚫 Filtrada oferta de fuera: lewes, england, united kingdom (ID: 4393271425)
+2026-04-01 00:15:25,909 WARNING    🚫 Filtrada oferta de fuera: west sussex, england, united kingdom (ID: 4395654819)
+2026-04-01 00:15:25,909 WARNING    🚫 Filtrada oferta de fuera: brighton, england, united kingdom (ID: 4393510471)
+2026-04-01 00:15:25,909 WARNING    🚫 Filtrada oferta de fuera: brighton, england, united kingdom (ID: 4395879269)
+2026-04-01 00:15:25,909 WARNING    🚫 Filtrada oferta de fuera: brighton, england, united kingdom (ID: 4392414441)
+2026-04-01 00:15:25,909 WARNING    🚫 Filtrada oferta de fuera: hove, england, united kingdom (ID: 4395699745)
+2026-04-01 00:15:25,909 WARNING    🚫 Filtrada oferta de fuera: crawley, england, united kingdom (ID: 4395860824)
+2026-04-01 00:15:25,909 WARNING    🚫 Filtrada oferta de fuera: crawley, england, united kingdom (ID: 4392479737)
+2026-04-01 00:15:25,909 WARNING    🚫 Filtrada oferta de fuera: crawley, england, united kingdom (ID: 4392491355)
+2026-04-01 00:15:25,909 WARNING    🚫 Filtrada oferta de fuera: brighton, england, united kingdom (ID: 4392133777)
+2026-04-01 00:15:25,909 INFO     ✅ +0 locales encontradas.
+2026-04-01 00:15:28,909 INFO  🔎 Buscando [Delivery]...
+2026-04-01 00:15:29,354 WARNING    🚫 Filtrada oferta de fuera: brighton, england, united kingdom (ID: 4383770551)
+2026-04-01 00:15:29,354 WARNING    🚫 Filtrada oferta de fuera: ford, england, united kingdom (ID: 4390820869)
+2026-04-01 00:15:29,354 WARNING    🚫 Filtrada oferta de fuera: shoreham-by-sea, england, united kingdom (ID: 4392440145)
+2026-04-01 00:15:29,354 WARNING    🚫 Filtrada oferta de fuera: lingfield, england, united kingdom (ID: 4393560695)
+2026-04-01 00:15:29,354 WARNING    🚫 Filtrada oferta de fuera: worthing, england, united kingdom (ID: 4393542858)
+2026-04-01 00:15:29,354 WARNING    🚫 Filtrada oferta de fuera: hove, england, united kingdom (ID: 4393256356)
+2026-04-01 00:15:29,354 WARNING    🚫 Filtrada oferta de fuera: horsham, england, united kingdom (ID: 4392467350)
+2026-04-01 00:15:29,354 WARNING    🚫 Filtrada oferta de fuera: worthing, england, united kingdom (ID: 4392481024)
+2026-04-01 00:15:29,354 WARNING    🚫 Filtrada oferta de fuera: crawley, england, united kingdom (ID: 4392457444)
+2026-04-01 00:15:29,354 WARNING    🚫 Filtrada oferta de fuera: crawley, england, united kingdom (ID: 4385517535)
+2026-04-01 00:15:29,354 INFO     ✅ +0 locales encontradas.
+2026-04-01 00:15:32,355 INFO  🔎 Buscando [Innovation]...
+2026-04-01 00:15:32,764 WARNING    🚫 Filtrada oferta de fuera: brighton, england, united kingdom (ID: 4392412528)
+2026-04-01 00:15:32,764 WARNING    🚫 Filtrada oferta de fuera: brighton, england, united kingdom (ID: 4393509212)
+2026-04-01 00:15:32,764 WARNING    🚫 Filtrada oferta de fuera: lewes, england, united kingdom (ID: 4393271425)
+2026-04-01 00:15:32,764 WARNING    🚫 Filtrada oferta de fuera: east grinstead, england, united kingdom (ID: 4393545191)
+2026-04-01 00:15:32,764 WARNING    🚫 Filtrada oferta de fuera: east grinstead, england, united kingdom (ID: 4392439008)
+2026-04-01 00:15:32,764 WARNING    🚫 Filtrada oferta de fuera: brighton, england, united kingdom (ID: 4393289889)
+2026-04-01 00:15:32,764 WARNING    🚫 Filtrada oferta de fuera: hove, england, united kingdom (ID: 4395699745)
+2026-04-01 00:15:32,764 WARNING    🚫 Filtrada oferta de fuera: east preston, england, united kingdom (ID: 4393584447)
+2026-04-01 00:15:32,764 WARNING    🚫 Filtrada oferta de fuera: brighton, england, united kingdom (ID: 4393581553)
+2026-04-01 00:15:32,764 WARNING    🚫 Filtrada oferta de fuera: crawley, england, united kingdom (ID: 4385514555)
+2026-04-01 00:15:32,764 INFO     ✅ +0 locales encontradas.
+2026-04-01 00:15:35,765 INFO  🔎 Buscando [Transformation]...
+2026-04-01 00:15:36,147 WARNING    🚫 Filtrada oferta de fuera: east grinstead, england, united kingdom (ID: 4393545191)
+2026-04-01 00:15:36,147 WARNING    🚫 Filtrada oferta de fuera: crawley, england, united kingdom (ID: 4395846574)
+2026-04-01 00:15:36,147 WARNING    🚫 Filtrada oferta de fuera: east grinstead, england, united kingdom (ID: 4392439008)
+2026-04-01 00:15:36,147 WARNING    🚫 Filtrada oferta de fuera: crawley, england, united kingdom (ID: 4383283189)
+2026-04-01 00:15:36,147 WARNING    🚫 Filtrada oferta de fuera: crawley, england, united kingdom (ID: 4392194687)
+2026-04-01 00:15:36,147 WARNING    🚫 Filtrada oferta de fuera: brighton, england, united kingdom (ID: 4370299838)
+2026-04-01 00:15:36,147 WARNING    🚫 Filtrada oferta de fuera: dorking, england, united kingdom (ID: 4393584432)
+2026-04-01 00:15:36,147 WARNING    🚫 Filtrada oferta de fuera: worthing, england, united kingdom (ID: 4392152179)
+2026-04-01 00:15:36,147 WARNING    🚫 Filtrada oferta de fuera: pevensey, england, united kingdom (ID: 4392154202)
+2026-04-01 00:15:36,147 WARNING    🚫 Filtrada oferta de fuera: lewes, england, united kingdom (ID: 4393561020)
+2026-04-01 00:15:36,147 INFO     ✅ +0 locales encontradas.
+2026-04-01 00:15:39,149 INFO Log scraping: scraping_20260401_001448.json
+2026-04-01 00:15:39,149 INFO Nuevos: 0 de 0 scrapeados
+2026-04-01 00:15:39,149 INFO Sin nuevas ofertas hoy.
