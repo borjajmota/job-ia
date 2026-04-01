@@ -147,8 +147,8 @@ def agent1_filter_titles(jobs: dict, profile: dict) -> list:
     summary       = profile.get("summary", "")[:400]
 
     titles_block = "\n".join(
-        f'{j["id"]} | {j["title"]} | {j["company"]}'
-        for j in jobs.values()
+        f"{j.get('id', 'ID-Error')} | {j.get('title', 'Sin Título')} | {j.get('company', 'Sin Empresa')}"
+        for j in jobs_list
     )
 
     prompt = f"""Eres un filtro de ofertas de empleo para un profesional senior de Data & AI en Madrid.
