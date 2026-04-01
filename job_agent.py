@@ -63,17 +63,20 @@ def scrape_job_ids() -> dict:
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
         "Referer":    "https://www.google.com/",
     }
-    
+
+    # Simplificamos a 'Madrid, Spain' para que LinkedIn no se líe con nombres largos
+    LOCATION_URL = "Madrid%2C%20Spain"
+    GEO_ID = "100958104"
+
     for q in SEARCH_QUERIES:
-        log.info(f" 🔎 [{q}] en Comunidad de Madrid")
+        log.info(f" 🔎 Buscando [{q}]...")
         
-        # URL limpia sin parámetro 'distance' para evitar el bug de Brasil
         url = (
             f"https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search"
             f"?keywords={q.replace(' ','%20')}"
-            #f"&location={LINKEDIN_LOCATION}"
-            f"&geoId={LINKEDIN_GEO_ID}"
-            f"&f_TPR=r86400"  # Últimas 24 horas
+            f"&location={LOCATION_URL}"
+            f"&geoId={GEO_ID}"
+            f"&f_TPR=r86400"
             f"&start=0"
         )
         
@@ -81,44 +84,42 @@ def scrape_job_ids() -> dict:
             res  = requests.get(url, headers=headers, timeout=15)
             html = res.text
 
-            # Captura de IDs
-            ids = re.findall(r'jobPosting:(\d+)', html)
-            if not ids:
-                ids = re.findall(r'data-id=["\'](\d+)["\']', html)
+            # 1. Extraemos los bloques de IDs
+            ids = re.findall(r'jobPosting:(\d+)', html) or re.findall(r'data-id=["\'](\d+)["\']', html)
+            
+            # 2. EXTRAEMOS LAS UBICACIONES (La clave para echar a los ingleses)
+            # Buscamos el texto que LinkedIn pone debajo del nombre de la empresa
+            locations = re.findall(r'class="job-search-card__location"[^>]*>(.*?)</span>', html, re.S)
 
-            # Captura de Títulos y Empresas
+            # 3. Títulos y empresas
             titles    = re.findall(r'class="[^"]*base-search-card__title[^"]*"[^>]*>(.*?)</h3', html, re.S)
             companies = re.findall(r'class="[^"]*base-search-card__subtitle[^"]*"[^>]*>.*?<a[^>]*>(.*?)</a', html, re.S)
-            
-            # Limpieza rápida de HTML en los resultados
-            titles    = [re.sub(r'<[^<]+?>', '', t).strip() for t in titles]
-            companies = [re.sub(r'<[^<]+?>', '', c).strip() for c in companies]
 
             added = 0
             for i, jid in enumerate(ids):
-                # FILTRO DE SEGURIDAD: Evitar duplicados y asegurar consistencia
                 if jid not in jobs:
-                    # Si por algún error de LinkedIn el HTML está vacío, saltamos
-                    title = titles[i] if i < len(titles) else "Título no disponible"
-                    company = companies[i] if i < len(companies) else "Empresa no disponible"
+                    # Obtenemos la ubicación de esta oferta concreta
+                    raw_loc = locations[i].strip().lower() if i < len(locations) else ""
                     
-                    # Verificación final: LinkedIn a veces mezcla anuncios "Promoted" de fuera.
-                    # El GeoID 100958104 es muy fuerte, pero este check extra no sobra:
-                    jobs[jid] = {
-                        "id":      jid,
-                        "title":   title,
-                        "company": company,
-                        "link":    f"https://www.linkedin.com/jobs/view/{jid}/",
-                    }
-                    added += 1
-            
-            log.info(f"    ✅ +{added} nuevos (total acumulado: {len(jobs)})")
-            time.sleep(random.uniform(3, 5)) # Pausa aleatoria para no ser bloqueado
+                    # FILTRO DE SEGURIDAD: ¿Es realmente de Madrid o España?
+                    if "madrid" in raw_loc or "españa" in raw_loc or "spain" in raw_loc:
+                        jobs[jid] = {
+                            "id":      jid,
+                            "title":   re.sub(r'<[^<]+?>', '', titles[i]).strip() if i < len(titles) else "N/A",
+                            "company": re.sub(r'<[^<]+?>', '', companies[i]).strip() if i < len(companies) else "N/A",
+                            "link":    f"https://www.linkedin.com/jobs/view/{jid}/"
+                        }
+                        added += 1
+                    else:
+                        # Aquí verás en los logs cómo el bot detecta y expulsa a los de UK
+                        log.warning(f"   🚫 Filtrada oferta de fuera: {raw_loc} (ID: {jid})")
+
+            log.info(f"    ✅ +{added} locales encontradas.")
+            time.sleep(3)
             
         except Exception as e:
-            log.warning(f"  ⚠️ Error en búsqueda [{q}]: {e}")
+            log.warning(f"  ⚠️ Error en búsqueda: {e}")
 
-    log.info(f"🚀 Scraping finalizado. {len(jobs)} ofertas únicas para analizar.")
     return jobs
 
 # ── GROQ HELPER ───────────────────────────────────────────────────────────────
