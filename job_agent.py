@@ -61,62 +61,35 @@ def scrape_job_ids() -> dict:
     jobs = {}
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        "Accept-Language": "es-ES,es;q=0.9",
-        "Referer": "https://www.google.es/",
     }
 
     for q in SEARCH_QUERIES:
-        log.info(f"🔎 Buscando [{q}] en Madrid...")
+        log.info(f"🔎 Capturando IDs para [{q}]...")
         
+        # URL básica de Madrid
         url = (
-            f"https://es.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search"
+            f"https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search"
             f"?keywords={q.replace(' ','%20')}"
-            f"&location={LINKEDIN_LOCATION}"
-            f"&geoId={LINKEDIN_GEO_ID}"
-            f"&f_TPR=r86400" # Últimas 24h
-            f"&start=0"
+            f"&location=Madrid%2C%20Spain"
+            f"&geoId=100958104"
+            f"&f_TPR=r86400"
         )
         
         try:
             res = requests.get(url, headers=headers, timeout=15)
-            html = res.text
-
-            # 1. IDs y Ubicaciones
-            ids = re.findall(r'jobPosting:(\d+)', html) or re.findall(r'data-id=["\'](\d+)["\']', html)
-            # Buscamos el texto exacto de la ubicación en la tarjeta
-            locations = re.findall(r'class="[^"]*location[^"]*"[^>]*>(.*?)</span>', html, re.S)
+            # Extraemos IDs a lo bruto, sin filtros de texto que puedan fallar
+            ids = re.findall(r'jobPosting:(\d+)', res.text) or re.findall(r'data-id=["\'](\d+)["\']', res.text)
             
-            # 2. Títulos y Empresas
-            titles = re.findall(r'class="[^"]*title[^"]*"[^>]*>(.*?)</h3', html, re.S)
-            companies = re.findall(r'class="[^"]*subtitle[^"]*"[^>]*>.*?<a[^>]*>(.*?)</a', html, re.S)
-
-            added = 0
-            for i, jid in enumerate(ids):
+            for jid in ids:
                 if jid not in jobs:
-                    # Limpiamos el texto (quitamos espacios, etiquetas y pasamos a minúsculas)
-                    raw_loc = re.sub(r'<[^<]+?>', '', locations[i]).strip().lower() if i < len(locations) else ""
-                    
-                    # --- FILTRO DE ADUANA ---
-                    # Solo nos interesan estos dos términos. Nada más.
-                    # Esto matará cualquier oferta de 'London', 'United Kingdom', etc.
-                    if "madrid" in raw_loc or "españa" in raw_loc or "spain" in raw_loc:
-                        jobs[jid] = {
-                            "id": jid,
-                            "title": re.sub(r'<[^<]+?>', '', titles[i]).strip() if i < len(titles) else "N/A",
-                            "company": re.sub(r'<[^<]+?>', '', companies[i]).strip() if i < len(companies) else "N/A",
-                            "link": f"https://www.linkedin.com/jobs/view/{jid}/"
-                        }
-                        added += 1
-                    else:
-                        # Esto te confirmará en los logs que está echando a los ingleses
-                        log.warning(f"   🚫 RECHAZADA: Oferta en '{raw_loc}' (No es Madrid)")
-
-            log.info(f"   ✅ +{added} ofertas confirmadas en Madrid.")
-            time.sleep(3)
-            
+                    jobs[jid] = {
+                        "id": jid,
+                        "link": f"https://www.linkedin.com/jobs/view/{jid}/"
+                    }
+            log.info(f"   ✅ {len(ids)} IDs encontrados para [{q}]")
         except Exception as e:
             log.error(f"  ❌ Error: {e}")
-
+            
     return jobs
 
 # ── GROQ HELPER ───────────────────────────────────────────────────────────────
