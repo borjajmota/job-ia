@@ -71,7 +71,7 @@ def scrape_job_ids() -> dict:
         url = (
             f"https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search"
             f"?keywords={q.replace(' ','%20')}"
-            f"&location={LINKEDIN_LOCATION}"
+            #f"&location={LINKEDIN_LOCATION}"
             f"&geoId={LINKEDIN_GEO_ID}"
             f"&f_TPR=r86400"  # Últimas 24 horas
             f"&start=0"
@@ -370,7 +370,7 @@ def build_email_html(valid: list, caveats: list, today: str, n_scraped: int, n_c
     <div>
       <div style="font-size:16px;font-weight:600;color:#111;">Empleos del día</div>
       <div style="font-size:11px;color:#9ca3af;margin-top:2px;">
-        {today} &bull; Madrid +50km &bull; {n_scraped} vistas &bull; {n_candidates} analizadas
+        {today} &bull; Madrid &bull; {n_scraped} vistas &bull; {n_candidates} analizadas
       </div>
     </div>
     <div style="display:flex;gap:16px;text-align:center;">
