@@ -1,0 +1,45 @@
+2026-04-07 09:51:36,091 INFO =======================================================
+2026-04-07 09:51:36,091 INFO AGENTE DE EMPLEO — 07/04/2026 — 20260407_095136
+2026-04-07 09:51:36,091 INFO =======================================================
+2026-04-07 09:51:36,108 INFO   [Data] @ Comunidad de Madrid, España
+2026-04-07 09:51:36,594 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-04-07 09:51:39,594 INFO   [AI] @ Comunidad de Madrid, España
+2026-04-07 09:51:39,950 INFO     +0 nuevos, 7 filtrados fuera de España (total: 0)
+2026-04-07 09:51:42,950 INFO   [Cloud] @ Comunidad de Madrid, España
+2026-04-07 09:51:43,322 INFO     +0 nuevos, 4 filtrados fuera de España (total: 0)
+2026-04-07 09:51:46,322 INFO   [Analytics] @ Comunidad de Madrid, España
+2026-04-07 09:51:46,683 INFO     +0 nuevos, 6 filtrados fuera de España (total: 0)
+2026-04-07 09:51:49,683 INFO   [Head] @ Comunidad de Madrid, España
+2026-04-07 09:51:50,160 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-04-07 09:51:53,160 INFO   [Lead] @ Comunidad de Madrid, España
+2026-04-07 09:51:53,581 INFO     +1 nuevos, 9 filtrados fuera de España (total: 1)
+2026-04-07 09:51:56,581 INFO   [Director] @ Comunidad de Madrid, España
+2026-04-07 09:51:56,990 INFO     +0 nuevos, 10 filtrados fuera de España (total: 1)
+2026-04-07 09:51:59,990 INFO   [Manager] @ Comunidad de Madrid, España
+2026-04-07 09:52:00,396 INFO     +0 nuevos, 10 filtrados fuera de España (total: 1)
+2026-04-07 09:52:03,396 INFO   [Architect] @ Comunidad de Madrid, España
+2026-04-07 09:52:03,727 INFO     +0 nuevos, 2 filtrados fuera de España (total: 1)
+2026-04-07 09:52:06,727 INFO   [Product] @ Comunidad de Madrid, España
+2026-04-07 09:52:07,097 INFO     +0 nuevos, 10 filtrados fuera de España (total: 1)
+2026-04-07 09:52:10,097 INFO   [Governance] @ Comunidad de Madrid, España
+2026-04-07 09:52:10,491 INFO     +0 nuevos, 6 filtrados fuera de España (total: 1)
+2026-04-07 09:52:13,492 INFO   [Platform] @ Comunidad de Madrid, España
+2026-04-07 09:52:13,901 INFO     +0 nuevos, 10 filtrados fuera de España (total: 1)
+2026-04-07 09:52:16,901 INFO   [Delivery] @ Comunidad de Madrid, España
+2026-04-07 09:52:17,296 INFO     +0 nuevos, 10 filtrados fuera de España (total: 1)
+2026-04-07 09:52:20,296 INFO   [Innovation] @ Comunidad de Madrid, España
+2026-04-07 09:52:20,692 INFO     +0 nuevos, 10 filtrados fuera de España (total: 1)
+2026-04-07 09:52:23,692 INFO   [Transformation] @ Comunidad de Madrid, España
+2026-04-07 09:52:24,023 INFO     +0 nuevos, 9 filtrados fuera de España (total: 1)
+2026-04-07 09:52:27,023 INFO Total IDs únicos scrapeados: 1
+2026-04-07 09:52:27,025 INFO Log scraping: scraping_20260407_095136.json
+2026-04-07 09:52:27,025 INFO Nuevos: 1 de 1 scrapeados
+2026-04-07 09:52:27,025 INFO   [Agente 1] Filtrando 1 títulos...
+2026-04-07 09:52:27,516 INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-07 09:52:27,529 INFO   [Agente 1] Raw (200 chars): {"candidates": ["4397795611", "4397795612", "4397795613", "4397795614", "4397795615", "4397795616", "4397795617", "4397795618", "4397795619", "4397795620", "4397795621", "4397795622", "4397795623", "4
+2026-04-07 09:52:27,530 INFO   [Agente 1] OK — 30 candidatos
+2026-04-07 09:52:27,530 INFO Log Agente 1: agent1_20260407_095136.json
+2026-04-07 09:52:27,530 INFO Candidatos para Agente 2: 30
+2026-04-07 09:52:27,531 INFO Log resultados: results_20260407_095136.json
+2026-04-07 09:52:27,531 INFO Resultado — Válidas: 0, Matices: 0
+2026-04-07 09:52:28,387 INFO FIN — 20260407_095136
