@@ -1,0 +1,23 @@
+{
+  "run_id": "20260408_095053",
+  "valid": [],
+  "caveats": [
+    {
+      "id": "4398509461",
+      "title": "Paid Media Specialist",
+      "company": "Talent Hub®",
+      "location": "Greater Brighton and Hove Area",
+      "link": "https://www.linkedin.com/jobs/view/4398509461/",
+      "description": "Senior Paid Media Executive (Manager) Brighton-based media agency Salary circa £45,000 Talent Hub are working with a is a full-service media agency based in Brighton who work with some of the UK’s most exciting brands in music, arts, entertainment and culture As their digital work continues to grow, they are looking for a hands-on Senior Paid Media Executive to strengthen delivery, improve consistency, and help bring structure to their paid media campaigns. Key responsibilities of this Senior Paid Media job:- Plan, build and manage paid media campaigns across platforms including Meta Ads, Google Ads, TikTok, X (Twitter) and Reddit Translate campaign briefs and media plans into well-structured campaign builds and platform setups Manage campaign launches, pacing and optimisation to ensure campaigns perform against client objectives Accurately manage campaign budgets and track spend across multiple campaigns Implement and maintain conversion tracking and tagging, ensuring campaign measurement is reliable Monitor campaign performance and carry out ongoing optimisation and testing Build and maintain clean campaign structures, naming conventions and QA processes across all paid media platforms Support the production of campaign performance reports, analysing results and identifying clear insights Provide guidance and support to junior digital executives, helping develop their campaign management skills Take ownership of maintaining clear campaign tracking, budget pacing and reporting processes across all live campaigns What you will need:- 3–5 years of experience in paid digital marketing, ideally within an agency or media buying environment Confident running campaigns from setup through optimisation and reporting Strong attention to detail when managing budgets, campaign builds and reporting data Strong hands-on experience managing campaigns across Meta Ads (Facebook &amp; Instagram) and Google Ads (Search, Display &amp; YouTube) Experience running campaigns on TikTok Ads, X (Twitter) Ads and Reddit Ads Familiarity with programmatic display advertising is advantageous Experience running digital audio campaigns (Spotify, podcast networks or programmatic audio) is a bonus Benefits:- 25 days holiday plus bank holidays, opportunities to enjoy festivals and become part of this vibrant Brighton-based agency!",
+      "analysis": {
+        "classification": "VÁLIDA_CON_MATICES",
+        "score_match": 6,
+        "score_empresa": 2,
+        "score_final": 5,
+        "match_summary": "El rol combina habilidades en marketing digital, pero falta experiencia en liderazgo y arquitectura. La empresa es pequeña y desconocida.",
+        "gaps": "Falta experiencia en liderazgo y arquitectura. La empresa es pequeña y desconocida.",
+        "discard_reason": null
+      }
+    }
+  ]
+}

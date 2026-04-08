@@ -117,6 +117,19 @@
     "match_summary": "El rol combina gestión y estrategia, pero requiere experiencia en marketing y publicidad social. La empresa es pequeña y desconocida."
   },
   {
+    "date": "2026-04-08",
+    "run_id": "20260408_095053",
+    "applied": false,
+    "classification": "VÁLIDA_CON_MATICES",
+    "score_final": 5,
+    "score_match": 6,
+    "score_empresa": 2,
+    "title": "Paid Media Specialist",
+    "company": "Talent Hub®",
+    "link": "https://www.linkedin.com/jobs/view/4398509461/",
+    "match_summary": "El rol combina habilidades en marketing digital, pero falta experiencia en liderazgo y arquitectura. La empresa es pequeña y desconocida."
+  },
+  {
     "date": "2026-04-01",
     "run_id": "20260331_235100",
     "applied": false,
@@ -430,5 +443,18 @@
     "company": "Rolls-Royce",
     "link": "https://www.linkedin.com/jobs/view/4392439008/",
     "match_summary": "El rol no combina arquitectura + gestión + estrategia, y el perfil de Borja está claramente sobrecualificado."
+  },
+  {
+    "date": "2026-04-08",
+    "run_id": "20260408_095053",
+    "applied": false,
+    "classification": "DESCARTAR",
+    "score_final": 0,
+    "score_match": 0,
+    "score_empresa": 0,
+    "title": "SaaS Sales Account Executive",
+    "company": "Talent Hub®",
+    "link": "https://www.linkedin.com/jobs/view/4393569350/",
+    "match_summary": "El rol no es tecnológico y no combina arquitectura + gestión + estrategia"
   }
 ]
