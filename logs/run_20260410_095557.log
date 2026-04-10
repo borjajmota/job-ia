@@ -1,0 +1,50 @@
+2026-04-10 09:55:57,973 INFO =======================================================
+2026-04-10 09:55:57,974 INFO AGENTE DE EMPLEO — 10/04/2026 — 20260410_095557
+2026-04-10 09:55:57,974 INFO =======================================================
+2026-04-10 09:55:57,992 INFO   [Data] @ Comunidad de Madrid, España
+2026-04-10 09:55:58,403 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-04-10 09:56:01,403 INFO   [AI] @ Comunidad de Madrid, España
+2026-04-10 09:56:01,775 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-04-10 09:56:04,775 INFO   [Cloud] @ Comunidad de Madrid, España
+2026-04-10 09:56:05,162 INFO     +1 nuevos, 9 filtrados fuera de España (total: 1)
+2026-04-10 09:56:08,162 INFO   [Analytics] @ Comunidad de Madrid, España
+2026-04-10 09:56:08,524 INFO     +0 nuevos, 9 filtrados fuera de España (total: 1)
+2026-04-10 09:56:11,524 INFO   [Head] @ Comunidad de Madrid, España
+2026-04-10 09:56:11,860 INFO     +0 nuevos, 10 filtrados fuera de España (total: 1)
+2026-04-10 09:56:14,861 INFO   [Lead] @ Comunidad de Madrid, España
+2026-04-10 09:56:15,224 INFO     +0 nuevos, 10 filtrados fuera de España (total: 1)
+2026-04-10 09:56:18,224 INFO   [Director] @ Comunidad de Madrid, España
+2026-04-10 09:56:18,586 INFO     +0 nuevos, 10 filtrados fuera de España (total: 1)
+2026-04-10 09:56:21,586 INFO   [Manager] @ Comunidad de Madrid, España
+2026-04-10 09:56:22,031 INFO     +0 nuevos, 10 filtrados fuera de España (total: 1)
+2026-04-10 09:56:25,031 INFO   [Architect] @ Comunidad de Madrid, España
+2026-04-10 09:56:25,251 INFO     +0 nuevos, 0 filtrados fuera de España (total: 1)
+2026-04-10 09:56:28,252 INFO   [Product] @ Comunidad de Madrid, España
+2026-04-10 09:56:28,627 INFO     +0 nuevos, 10 filtrados fuera de España (total: 1)
+2026-04-10 09:56:31,628 INFO   [Governance] @ Comunidad de Madrid, España
+2026-04-10 09:56:31,980 INFO     +0 nuevos, 10 filtrados fuera de España (total: 1)
+2026-04-10 09:56:34,980 INFO   [Platform] @ Comunidad de Madrid, España
+2026-04-10 09:56:35,380 INFO     +0 nuevos, 10 filtrados fuera de España (total: 1)
+2026-04-10 09:56:38,381 INFO   [Delivery] @ Comunidad de Madrid, España
+2026-04-10 09:56:38,785 INFO     +0 nuevos, 10 filtrados fuera de España (total: 1)
+2026-04-10 09:56:41,785 INFO   [Innovation] @ Comunidad de Madrid, España
+2026-04-10 09:56:42,159 INFO     +0 nuevos, 10 filtrados fuera de España (total: 1)
+2026-04-10 09:56:45,159 INFO   [Transformation] @ Comunidad de Madrid, España
+2026-04-10 09:56:45,541 INFO     +0 nuevos, 10 filtrados fuera de España (total: 1)
+2026-04-10 09:56:48,541 INFO Total IDs únicos scrapeados: 1
+2026-04-10 09:56:48,543 INFO Log scraping: scraping_20260410_095557.json
+2026-04-10 09:56:48,543 INFO Nuevos: 1 de 1 scrapeados
+2026-04-10 09:56:48,543 INFO   [Agente 1] Filtrando 1 títulos...
+2026-04-10 09:56:49,304 INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-10 09:56:49,319 INFO   [Agente 1] Raw (200 chars): {"candidates": ["4399883616", 1234567890, 9876543210, 1111111111, 2222222222, 3333333333, 4444444444, 5555555555, 6666666666, 7777777777, 8888888888, 9999999999, 1010101010, 1212121212, 1313131313, 14
+2026-04-10 09:56:49,319 INFO   [Agente 1] OK — 29 candidatos
+2026-04-10 09:56:49,319 INFO Log Agente 1: agent1_20260410_095557.json
+2026-04-10 09:56:49,319 INFO Candidatos para Agente 2: 28
+2026-04-10 09:56:49,319 INFO   [Agente 2] Marketing Manager @ Talent Hub®
+2026-04-10 09:56:49,895 INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2026-04-10 09:56:49,896 WARNING   Rate limit — esperando 65s (intento 1/3)
+2026-04-10 09:57:55,370 INFO HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-10 09:57:55,371 INFO     → DESCARTADA: La oferta NO es tecnológica (Data/AI/Cloud/Software/Digital/Platform)
+2026-04-10 09:58:10,372 INFO Log resultados: results_20260410_095557.json
+2026-04-10 09:58:10,372 INFO Resultado — Válidas: 0, Matices: 0
+2026-04-10 09:58:11,236 INFO FIN — 20260410_095557
