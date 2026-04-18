@@ -1,0 +1,37 @@
+2026-04-18 08:08:05,132 INFO =======================================================
+2026-04-18 08:08:05,132 INFO AGENTE DE EMPLEO — 18/04/2026 — 20260418_080805
+2026-04-18 08:08:05,132 INFO =======================================================
+2026-04-18 08:08:05,150 INFO   [Data] @ Comunidad de Madrid, España
+2026-04-18 08:08:05,611 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-04-18 08:08:08,611 INFO   [AI] @ Comunidad de Madrid, España
+2026-04-18 08:08:08,987 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-04-18 08:08:11,987 INFO   [Cloud] @ Comunidad de Madrid, España
+2026-04-18 08:08:12,424 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-04-18 08:08:15,425 INFO   [Analytics] @ Comunidad de Madrid, España
+2026-04-18 08:08:15,821 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-04-18 08:08:18,822 INFO   [Head] @ Comunidad de Madrid, España
+2026-04-18 08:08:19,252 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-04-18 08:08:22,252 INFO   [Lead] @ Comunidad de Madrid, España
+2026-04-18 08:08:22,672 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-04-18 08:08:25,672 INFO   [Director] @ Comunidad de Madrid, España
+2026-04-18 08:08:26,079 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-04-18 08:08:29,080 INFO   [Manager] @ Comunidad de Madrid, España
+2026-04-18 08:08:29,436 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-04-18 08:08:32,437 INFO   [Architect] @ Comunidad de Madrid, España
+2026-04-18 08:08:32,786 INFO     +0 nuevos, 5 filtrados fuera de España (total: 0)
+2026-04-18 08:08:35,786 INFO   [Product] @ Comunidad de Madrid, España
+2026-04-18 08:08:36,160 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-04-18 08:08:39,160 INFO   [Governance] @ Comunidad de Madrid, España
+2026-04-18 08:08:39,533 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-04-18 08:08:42,533 INFO   [Platform] @ Comunidad de Madrid, España
+2026-04-18 08:08:42,971 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-04-18 08:08:45,971 INFO   [Delivery] @ Comunidad de Madrid, España
+2026-04-18 08:08:46,339 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-04-18 08:08:49,339 INFO   [Innovation] @ Comunidad de Madrid, España
+2026-04-18 08:08:49,697 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-04-18 08:08:52,698 INFO   [Transformation] @ Comunidad de Madrid, España
+2026-04-18 08:08:53,101 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-04-18 08:08:56,101 INFO Total IDs únicos scrapeados: 0
+2026-04-18 08:08:56,103 INFO Log scraping: scraping_20260418_080805.json
+2026-04-18 08:08:56,103 INFO Nuevos: 0 de 0 scrapeados
+2026-04-18 08:08:56,103 INFO Sin nuevas ofertas hoy.
