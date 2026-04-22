@@ -143,6 +143,19 @@
     "match_summary": "El rol combina habilidades en marketing digital, pero falta experiencia en liderazgo y arquitectura. La empresa es pequeña y desconocida."
   },
   {
+    "date": "2026-04-22",
+    "run_id": "20260422_104749",
+    "applied": false,
+    "classification": "VÁLIDA_CON_MATICES",
+    "score_final": 5,
+    "score_match": 6,
+    "score_empresa": 2,
+    "title": "Portfolio Manager",
+    "company": "JWH Recruitment",
+    "link": "https://www.linkedin.com/jobs/view/4404834909/",
+    "match_summary": "El rol de Portfolio Manager combina gestión y estrategia, pero requiere experiencia en contabilidad y finanzas. Borja tiene experiencia en gestión y estrategia, pero necesita desarrollar habilidades en contabilidad y finanzas."
+  },
+  {
     "date": "2026-04-01",
     "run_id": "20260331_235100",
     "applied": false,

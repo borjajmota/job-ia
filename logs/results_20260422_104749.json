@@ -1,0 +1,23 @@
+{
+  "run_id": "20260422_104749",
+  "valid": [],
+  "caveats": [
+    {
+      "id": "4404834909",
+      "title": "Portfolio Manager",
+      "company": "JWH Recruitment",
+      "location": "Greater Brighton and Hove Area",
+      "link": "https://www.linkedin.com/jobs/view/4404834909/",
+      "description": "Business Services Manager £50,000 – £60,000 per annum About Us We are recruiting on behalf of a well-established and highly regarded independent accountancy practice in the South East with a strong regional presence and a growing client base of owner-managed businesses and SMEs. The firm is known for its collaborative culture, modern working environment, and commitment to supporting both client success and employee development. This opportunity sits within a dynamic Business Services team and offers exposure to a varied portfolio of clients, alongside the chance to support and develop junior team members. The role also provides opportunities to contribute to business development initiatives and work closely with senior leadership on client strategy and delivery. Responsibilities Manage a portfolio of owner-managed businesses and SME clients across a range of sectors Review accounts preparation assignments and provide practical, value-added advice to clients Ensure client deadlines and compliance requirements are met efficiently and accurately Attend client meetings both in person and virtually as required Support senior leadership with work-in-progress monitoring and fee note preparation Assist with ad hoc project-based assignments and specialist engagements Supervise, mentor, and develop trainees and senior team members Undertake line management responsibilities where appropriate Support business development activity including networking and attending prospective client meetings Requirements ACA or ACCA qualified Minimum of 2 years’ post-qualification experience within an accountancy practice environment Experience managing a client portfolio independently Strong working knowledge of cloud-based accounting software packages Demonstrated experience supporting and developing junior staff Excellent communication and interpersonal skills Strong organisational skills with the ability to manage multiple deadlines Motivated, proactive, and commercially aware approach to client service Previous line management experience (desirable) Benefits Competitive salary with clear progression opportunities Hybrid and agile working arrangements Paid overtime or time off in lieu for additional hours worked Employer pension contribution scheme Option to purchase additional annual leave Health cash plan and wellbeing support schemes Retail and lifestyle discount platform Modern office environment with relaxed dress code Supportive and collaborative team culture focused on professional growth",
+      "analysis": {
+        "classification": "VÁLIDA_CON_MATICES",
+        "score_match": 6,
+        "score_empresa": 2,
+        "score_final": 5,
+        "match_summary": "El rol de Portfolio Manager combina gestión y estrategia, pero requiere experiencia en contabilidad y finanzas. Borja tiene experiencia en gestión y estrategia, pero necesita desarrollar habilidades en contabilidad y finanzas.",
+        "gaps": "Experiencia en contabilidad y finanzas, falta de experiencia en gestión de clientes en el sector de la contabilidad.",
+        "discard_reason": null
+      }
+    }
+  ]
+}
