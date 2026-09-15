@@ -4,3 +4,4 @@ __pycache__/
 *.pyc
 .venv/
 gate0_runs/
+*.egg-info/
