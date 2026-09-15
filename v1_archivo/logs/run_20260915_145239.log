@@ -1,0 +1,37 @@
+2026-09-15 14:52:39,994 INFO =======================================================
+2026-09-15 14:52:39,994 INFO AGENTE DE EMPLEO — 15/09/2026 — 20260915_145239
+2026-09-15 14:52:39,994 INFO =======================================================
+2026-09-15 14:52:40,006 INFO   [Data] @ Comunidad de Madrid, España
+2026-09-15 14:52:40,370 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-09-15 14:52:43,370 INFO   [AI] @ Comunidad de Madrid, España
+2026-09-15 14:52:43,945 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-09-15 14:52:46,945 INFO   [Cloud] @ Comunidad de Madrid, España
+2026-09-15 14:52:47,312 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-09-15 14:52:50,312 INFO   [Analytics] @ Comunidad de Madrid, España
+2026-09-15 14:52:50,713 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-09-15 14:52:53,714 INFO   [Head] @ Comunidad de Madrid, España
+2026-09-15 14:52:54,272 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-09-15 14:52:57,272 INFO   [Lead] @ Comunidad de Madrid, España
+2026-09-15 14:52:57,641 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-09-15 14:53:00,641 INFO   [Director] @ Comunidad de Madrid, España
+2026-09-15 14:53:01,008 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-09-15 14:53:04,008 INFO   [Manager] @ Comunidad de Madrid, España
+2026-09-15 14:53:04,357 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-09-15 14:53:07,357 INFO   [Architect] @ Comunidad de Madrid, España
+2026-09-15 14:53:07,879 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-09-15 14:53:10,879 INFO   [Product] @ Comunidad de Madrid, España
+2026-09-15 14:53:11,341 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-09-15 14:53:14,341 INFO   [Governance] @ Comunidad de Madrid, España
+2026-09-15 14:53:14,699 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-09-15 14:53:17,699 INFO   [Platform] @ Comunidad de Madrid, España
+2026-09-15 14:53:18,043 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-09-15 14:53:21,044 INFO   [Delivery] @ Comunidad de Madrid, España
+2026-09-15 14:53:21,403 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-09-15 14:53:24,403 INFO   [Innovation] @ Comunidad de Madrid, España
+2026-09-15 14:53:24,825 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-09-15 14:53:27,825 INFO   [Transformation] @ Comunidad de Madrid, España
+2026-09-15 14:53:28,204 INFO     +0 nuevos, 10 filtrados fuera de España (total: 0)
+2026-09-15 14:53:31,205 INFO Total IDs únicos scrapeados: 0
+2026-09-15 14:53:31,206 INFO Log scraping: scraping_20260915_145239.json
+2026-09-15 14:53:31,206 INFO Nuevos: 0 de 0 scrapeados
+2026-09-15 14:53:31,206 INFO Sin nuevas ofertas hoy.
