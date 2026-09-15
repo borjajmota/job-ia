@@ -27,6 +27,7 @@ jobs:
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           EMAIL_TO:           ${{ secrets.EMAIL_TO }}
           JOBIA_DB_PATH:      ${{ runner.workspace }}/jobia-state/jobia.db
+          JOBIA_LLM_MODEL:    openai/gpt-oss-120b
         run: .venv\Scripts\jobia run
 
       # El estado vive FUERA del repo, en disco del runner. Nada de commitear
