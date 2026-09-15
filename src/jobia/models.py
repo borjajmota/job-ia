@@ -4,7 +4,7 @@ from __future__ import annotations
 import hashlib
 import re
 from datetime import datetime
-from typing import Literal, Optional
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -41,7 +41,7 @@ class ScoredJob(BaseModel):
     veredicto: Literal["encaja", "dudoso", "descartar"]
     match: list[str] = Field(max_length=3, description="Por que encaja")
     gaps: list[str] = Field(max_length=2, description="Que te falta")
-    señal_roja: Optional[str] = None
+    señal_roja: str | None = None
 
 
 class QueryHealth(BaseModel):

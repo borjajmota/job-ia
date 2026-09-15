@@ -4,7 +4,7 @@ sin esto no hay "solo lo nuevo", ni umbral adaptativo, ni deteccion de bloqueo.
 from __future__ import annotations
 
 import sqlite3
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from jobia.models import Job, RunReport, ScoredJob
@@ -57,7 +57,7 @@ class Store:
     def filter_new(self, jobs: list[Job]) -> list[Job]:
         """Nuevo = job_id desconocido Y repost_key desconocida.
         Lo segundo evita que la misma oferta republicada te llegue cada semana."""
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         new: list[Job] = []
         for j in jobs:
             row = self.db.execute(
@@ -77,7 +77,7 @@ class Store:
 
     # ---------- umbral adaptativo ----------
     def threshold(self, percentile: int, floor: int, lookback_days: int) -> int:
-        since = (datetime.now(timezone.utc) - timedelta(days=lookback_days)).isoformat()
+        since = (datetime.now(UTC) - timedelta(days=lookback_days)).isoformat()
         vals = [r[0] for r in self.db.execute(
             "SELECT score FROM scores WHERE scored_at>=? ORDER BY score", (since,))]
         if len(vals) < 20:          # sin historia suficiente, usa el suelo
@@ -86,7 +86,7 @@ class Store:
         return max(floor, vals[min(idx, len(vals) - 1)])
 
     def save_scores(self, run_id: str, pv: int, scored: list[ScoredJob]) -> None:
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         self.db.executemany(
             "INSERT OR REPLACE INTO scores VALUES (?,?,?,?,?,?,?)",
             [(s.job_id, run_id, pv, s.score, s.veredicto, s.model_dump_json(), now)
@@ -110,7 +110,7 @@ class Store:
         self.db.commit()
 
     def already_ran_today(self) -> bool:
-        today = datetime.now(timezone.utc).strftime("%Y%m%d")
+        today = datetime.now(UTC).strftime("%Y%m%d")
         return self.db.execute(
             "SELECT 1 FROM runs WHERE run_id LIKE ? AND blocked=0", (f"{today}%",)
         ).fetchone() is not None

@@ -11,7 +11,7 @@ CV a medida sobre una oferta concreta sin repetir la busqueda.
 from __future__ import annotations
 
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import TypedDict
 
@@ -63,7 +63,7 @@ def _db_path() -> str:
 
 def load_profile(state: GraphState) -> GraphState:
     profile = _load_yaml("config/profile.yaml")
-    run_id = state.get("run_id") or datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    run_id = state.get("run_id") or datetime.now(UTC).strftime("%Y%m%d-%H%M%S")
     return {"profile": profile, "profile_version": profile["version"], "run_id": run_id}
 
 
@@ -178,7 +178,7 @@ def decide(state: GraphState) -> GraphState:
 
 
 def notify(state: GraphState) -> GraphState:
-    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    today = datetime.now(UTC).strftime("%Y-%m-%d")
     digest = state.get("digest", [])
     if digest:
         html = notify_email.render_digest(digest, today)
@@ -194,7 +194,7 @@ def persist(state: GraphState) -> GraphState:
         store.save_scores(state["run_id"], state.get("profile_version", 0), state["scored"])
     report = RunReport(
         run_id=state["run_id"],
-        started_at=datetime.now(timezone.utc),
+        started_at=datetime.now(UTC),
         profile_version=state.get("profile_version", 0),
         queries=state.get("health", []),
         n_raw=len(state.get("raw", [])),
@@ -212,7 +212,7 @@ def persist(state: GraphState) -> GraphState:
 def alert_blocked(state: GraphState) -> GraphState:
     """El email de alarma: la linea de codigo mas valiosa del proyecto
     (DISENO.md 4.1). Es la correccion directa de los 25 dias perdidos en v1."""
-    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    today = datetime.now(UTC).strftime("%Y-%m-%d")
     reason = ("bloqueo explicito (SourceBlocked) en una o mas queries" if state.get("blocked")
               else "todas las queries devolvieron 0 resultados")
     html = notify_email.render_alert(reason, today)

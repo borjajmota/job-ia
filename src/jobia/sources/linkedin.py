@@ -9,11 +9,10 @@ Correcciones sobre la v1 del proyecto (ver DISENO.md, seccion 1):
 from __future__ import annotations
 
 import json
-import os
 import random
 import re
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from bs4 import BeautifulSoup
@@ -145,9 +144,7 @@ class LinkedInSource(JobSource):
             urn = card.select_one("[data-entity-urn]")
             link = card.select_one("a.base-card__full-link, a[href*='/jobs/view/']")
             jid = None
-            if urn and (m := re.search(r"(\d{6,})", urn.get("data-entity-urn", ""))):
-                jid = m.group(1)
-            elif link and (m := re.search(r"-(\d{6,})", link.get("href", ""))):
+            if urn and (m := re.search(r"(\d{6,})", urn.get("data-entity-urn", ""))) or link and (m := re.search(r"-(\d{6,})", link.get("href", ""))):
                 jid = m.group(1)
             title = card.select_one("h3, .base-search-card__title")
             company = card.select_one("h4 a, .base-search-card__subtitle") or card.select_one("h4")
@@ -186,6 +183,6 @@ def _parse_dt(v) -> datetime | None:
         return None
     try:
         d = datetime.fromisoformat(str(v).replace("Z", "+00:00"))
-        return d if d.tzinfo else d.replace(tzinfo=timezone.utc)
+        return d if d.tzinfo else d.replace(tzinfo=UTC)
     except ValueError:
         return None

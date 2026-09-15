@@ -42,7 +42,7 @@ def _call(client, prompt: str, model: str, max_retries: int = 3) -> str:
             err = str(exc)
             is_rate_limited = "429" in err or "rate_limit" in err.lower()
             if is_rate_limited and attempt < max_retries - 1:
-                m = re.search(r"retry after (\d+(?:\.\d+)?)", err, re.I)
+                m = re.search(r"retry after (\d+(?:\.\d+)?)", err, re.IGNORECASE)
                 time.sleep(float(m.group(1)) + 2 if m else 30)
                 continue
             raise
@@ -50,8 +50,8 @@ def _call(client, prompt: str, model: str, max_retries: int = 3) -> str:
 
 
 def _extract_json(text: str) -> dict | None:
-    text = re.sub(r"^```(?:json)?\s*", "", text.strip(), flags=re.M)
-    text = re.sub(r"\s*```\s*$", "", text, flags=re.M)
+    text = re.sub(r"^```(?:json)?\s*", "", text.strip(), flags=re.MULTILINE)
+    text = re.sub(r"\s*```\s*$", "", text, flags=re.MULTILINE)
     m = re.search(r"\{.*\}", text, re.DOTALL)
     if not m:
         return None
