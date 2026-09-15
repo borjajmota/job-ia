@@ -76,7 +76,7 @@ class LinkedInSource(JobSource):
     def search(self, term, query_id, *, location, geo_query, hours_old, limit) -> list[Job]:
         key = self.cache / f"search_{query_id}_{datetime.now():%Y%m%d}.json"
         if self.replay and key.exists():
-            return [Job(**j) for j in json.loads(key.read_text())]
+            return [Job(**j) for j in json.loads(key.read_text(encoding="utf-8"))]
 
         try:
             jobs = self._via_jobspy(term, query_id, location, hours_old, limit)
@@ -89,7 +89,10 @@ class LinkedInSource(JobSource):
             _pause()
             jobs = self._via_guest(term, query_id, geo_query, limit)
 
-        key.write_text(json.dumps([j.model_dump(mode="json") for j in jobs], ensure_ascii=False))
+        key.write_text(
+            json.dumps([j.model_dump(mode="json") for j in jobs], ensure_ascii=False),
+            encoding="utf-8",
+        )
         return jobs
 
     def _via_jobspy(self, term, query_id, location, hours_old, limit) -> list[Job]:
@@ -138,16 +141,16 @@ class LinkedInSource(JobSource):
     @staticmethod
     def _parse(html: str, query_id: str) -> list[Job]:
         out = []
-        for card in BeautifulSoup(html, "html.parser").select("li"):
+        for card in BeautifulSoup(html, "html.parser").select("li, div.base-card"):
             urn = card.select_one("[data-entity-urn]")
-            link = card.select_one("a[href*='/jobs/view/']")
+            link = card.select_one("a.base-card__full-link, a[href*='/jobs/view/']")
             jid = None
             if urn and (m := re.search(r"(\d{6,})", urn.get("data-entity-urn", ""))):
                 jid = m.group(1)
             elif link and (m := re.search(r"-(\d{6,})", link.get("href", ""))):
                 jid = m.group(1)
-            title = card.select_one("h3")
-            company = card.select_one("h4 a") or card.select_one("h4")
+            title = card.select_one("h3, .base-search-card__title")
+            company = card.select_one("h4 a, .base-search-card__subtitle") or card.select_one("h4")
             if not (jid and title and company):
                 continue
             loc = card.select_one(".job-search-card__location")
