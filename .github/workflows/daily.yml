@@ -1,0 +1,33 @@
+name: Job Agent - Diario
+
+on:
+  schedule:
+    - cron: "0 7 * * 1-5"      # L-V 09:00 Madrid (Actions se retrasa, es normal)
+  workflow_dispatch:
+
+jobs:
+  run:
+    # CRITICO: runner self-hosted. En ubuntu-latest la IP es de datacenter y
+    # LinkedIn la bloquea: es exactamente lo que mato a la v1 de este proyecto.
+    runs-on: [self-hosted, windows, jobia]
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar
+        run: |
+          python3 -m venv .venv
+          .venv/bin/pip install -e .
+
+      - name: Ejecutar
+        env:
+          GROQ_API_KEY:       ${{ secrets.GROQ_API_KEY }}
+          GMAIL_USER:         ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          EMAIL_TO:           ${{ secrets.EMAIL_TO }}
+          JOBIA_DB_PATH:      ${{ runner.workspace }}/jobia-state/jobia.db
+        run: .venv/bin/jobia run
+
+      # El estado vive FUERA del repo, en disco del runner. Nada de commitear
+      # la base de datos en cada corrida.

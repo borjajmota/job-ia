@@ -1,0 +1,28 @@
+[project]
+name = "jobia"
+version = "0.2.0"
+description = "Agente de busqueda de empleo en LinkedIn con LangGraph"
+requires-python = ">=3.11"
+dependencies = [
+  "python-jobspy>=1.1.80",
+  "curl_cffi>=0.7.0",
+  "beautifulsoup4>=4.12",
+  "langgraph>=0.2.60",
+  "langgraph-checkpoint-sqlite>=2.0",
+  "sentence-transformers>=3.0",
+  "pydantic>=2.7",
+  "pyyaml>=6.0",
+  "python-dotenv>=1.0",
+  "jinja2>=3.1",
+  "groq>=0.11",
+  "rich>=13.7",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[project.scripts]
+jobia = "jobia.cli:main"
+
+[tool.ruff]
+line-length = 100

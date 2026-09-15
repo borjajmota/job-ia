@@ -1,0 +1,36 @@
+# Consultas L0. Cada una se lanza por separado contra LinkedIn y se vigila
+# por separado: si una muere, lo sabras, en vez de diluirse en un total.
+#
+# Derivadas de semantic_anchors en profile.yaml. Terminos cortos: LinkedIn
+# castiga las consultas largas devolviendo casi nada.
+location: "Madrid, Community of Madrid, Spain"
+geo_query: "Madrid"
+hours_old: 24
+max_results_per_query: 50
+
+queries:
+  - id: data_ia
+    term: "data ia"
+    anchor: ai_solutions_architect
+  - id: engineering_manager
+    term: "engineering manager data"
+    anchor: engineering_manager_ia
+  - id: ai_architect
+    term: "ai architect"
+    anchor: ai_solutions_architect
+  - id: head_data_ai
+    term: "head of data ai"
+    anchor: data_ai_program_lead
+  - id: solutions_architect_cloud
+    term: "solutions architect cloud"
+    anchor: ai_solutions_architect
+
+# Reserva: activar solo si las de arriba se secan. Mas queries = mas peticiones
+# = mas riesgo de bloqueo. Cinco al dia es un volumen razonable.
+queries_backup:
+  - id: forward_deployed
+    term: "forward deployed engineer"
+  - id: ai_lead
+    term: "ai lead"
+  - id: technical_program_manager
+    term: "technical program manager"

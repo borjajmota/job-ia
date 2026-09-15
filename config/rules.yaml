@@ -1,0 +1,58 @@
+# --- L2: reglas duras. Deterministas, gratis, sin LLM. ---
+# Derivadas de hard_filters en profile.yaml.
+
+exclude_title_regex:
+  - "(?i)\\b(junior|jr\\.?|becari|intern|trainee|practicas|pr[aá]cticas)\\b"
+  - "(?i)\\b(sales|ventas|comercial|account executive|teleoperador)\\b"
+  - "(?i)\\b(recruiter|talent acquisition|rrhh)\\b"
+  - "(?i)\\b(helpdesk|soporte t[eé]cnico|service desk|support engineer)\\b"
+  - "(?i)\\b(data scientist|machine learning scientist|research scientist)\\b"
+  - "(?i)\\b(bi (developer|analyst)|analista de bi|power bi developer)\\b"
+
+exclude_companies:
+  # ETTs y consultoras que republican la misma oferta a diario
+  - "Michael Page"
+  - "Hays"
+  - "Adecco"
+  - "Randstad"
+  - "Page Personnel"
+
+require_any_in_title:
+  - data
+  - ia
+  - ai
+  - cloud
+  - architect
+  - arquitect
+  - platform
+  - plataforma
+  - lead
+  - head
+  - manager
+  - engineering
+
+# Señal amarilla: no descarta, resta puntos en L4.
+yellow_flag_regex:
+  - "(?i)\\b(cdaio|chief data.*officer|cto)\\b"
+  - "(?i)\\b(live coding|technical challenge|pair programming session)\\b"
+
+semantic:
+  model: "intfloat/multilingual-e5-base"   # local, gratis, bilingue es/en
+  top_k: 18
+  # Una oferta puntua por su MEJOR ancla, no por el promedio: asi un match
+  # fuerte en una linea no se diluye con las otras cuatro.
+  aggregation: max
+
+scoring:
+  # Umbral adaptativo: percentil de los scores de los ultimos N dias.
+  # Evita el "0 ofertas una semana / 40 la siguiente" de un umbral fijo.
+  mode: percentile
+  percentile: 80
+  floor: 65
+  max_per_email: 8
+  lookback_days: 30
+
+health:
+  # Si TODAS las queries devuelven 0, NO es "no hay ofertas": es bloqueo.
+  alert_on_all_queries_empty: true
+  alert_query_dead_after_runs: 3
