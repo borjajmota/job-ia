@@ -232,6 +232,9 @@ def via_a(concepto: str, location: str) -> dict:
 
 
 # --------------------------------------------------------------------------
+DATE_ONLY_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
 def evaluate(jobs: list[dict]) -> dict:
     now = datetime.now(timezone.utc)
     fresh = 0
@@ -239,11 +242,17 @@ def evaluate(jobs: list[dict]) -> dict:
         raw = j.get("posted_at")
         if not raw:
             continue
+        raw_str = str(raw).strip()
         try:
-            d = datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
+            d = datetime.fromisoformat(raw_str.replace("Z", "+00:00"))
             if d.tzinfo is None:
                 d = d.replace(tzinfo=timezone.utc)
-            if now - d <= timedelta(hours=26):  # margen de husos
+            if DATE_ONLY_RE.match(raw_str):
+                # date puro (sin hora): comparar por dia de calendario, no
+                # por resta en horas, o se pierden hasta 24h por redondeo.
+                if d.date() >= (now - timedelta(days=1)).date():
+                    fresh += 1
+            elif now - d <= timedelta(hours=26):  # margen de husos
                 fresh += 1
         except ValueError:
             continue
