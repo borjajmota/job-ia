@@ -1,0 +1,282 @@
+# ============================================================
+# PERFIL — Borja Jiménez Mota
+# ============================================================
+# A diferencia de la v1, este fichero NO es un bloque de prosa para una
+# sola llamada al LLM. Cada seccion alimenta un nivel concreto del embudo:
+#
+#   hard_filters     -> L2 (reglas deterministas, sin coste)
+#   semantic_anchors -> L3 (vectores contra los que se compara)
+#   scoring_guidance -> L4 (prompt del juez)
+#   evidence         -> futuro: generacion de CV a medida con trazabilidad
+#
+# version: sube el numero al tocar algo sustancial. El scoring guarda con
+# que version se evaluo cada oferta, para poder re-puntuar cuando madures.
+# ============================================================
+version: 2
+
+personal:
+  name: "Borja Jiménez Mota"
+  email: "borja.jmota@gmail.com"
+  location: "Madrid, España"
+  linkedin: "linkedin.com/in/borja-mota"
+  languages:
+    español: nativo
+    inglés: C1
+
+# ------------------------------------------------------------
+# IDENTIDAD
+# ------------------------------------------------------------
+summary: |
+  10+ años entre arquitectura de datos/IA y gestión de programas, con paso
+  internacional (España y EEUU). Evolución de Data Engineer hands-on a líder
+  técnico y manager, conservando profundidad técnica real. Diferencial: traduce
+  necesidades de negocio complejas en arquitecturas cloud escalables y lidera
+  equipos multidisciplinares de PoC a producción global.
+
+positioning: |
+  El encaje natural NO es "Head of Data" corporativo ni CDAIO. Es el cruce
+  arquitecto + engineering manager: alguien que monta equipo y producto de IA
+  con criterio técnico propio. Los procesos donde mejor puntúa son los que
+  piden construir, no gobernar.
+
+# ------------------------------------------------------------
+# EXPERIENCIA
+# ------------------------------------------------------------
+experience:
+  - role: "Head of Cloud & AI Transformation (Chapter Lead III)"
+    company: "ING España & Portugal"
+    period: "2026-03 → actualidad"
+    current: true
+    highlights:
+      - "Migración cloud a GCP y estrategia de IA de la entidad"
+      - "Chapter de 25+ ingenieros: hiring, performance, carreras técnicas"
+      - "Entorno regulado: DORA, EU AI Act, GDPR"
+      - "LLM Gateway, RAG, fine-tuning, MCP, guardrails, evals"
+      - "Adopción de IA: Copilot y Claude Code, upskilling del chapter"
+      - "Automatización del proceso RCSA con agentes y fuente de conocimiento propia"
+
+  - role: "Data & AI Program Manager + Solutions Architect"
+    company: "Inditex"
+    period: "2022 → 2026"
+    highlights:
+      - "Equipo multidisciplinar de 0 a 10 personas: hiring, mentoring, carreras"
+      - "Presupuesto de 1,5M€ gestionado; ROI acumulado ~4M€"
+      - "Iniciativas Data & AI en Riesgos, CX, Omnicanal, Operaciones, Sostenibilidad"
+      - "Arquitectura end-to-end hasta producción global"
+      - "PoCs con LLMs, RAG y fine-tuning con retorno medible"
+      - "Ejerció como Product Owner y Tech Lead en proyectos seleccionados"
+
+  - role: "Data Team Lead"
+    company: "Bluetab (para BBVA)"
+    period: "2021 → 2022"
+    highlights:
+      - "Tech lead global del producto digital en España, México y Colombia"
+      - "Liderazgo federado sin dependencia jerárquica, multi-geo"
+      - "Pipelines ETL con Spark/Scala y Python"
+
+  - role: "Senior Big Data Engineer"
+    company: "Bluetab (para BBVA USA)"
+    period: "2019 → 2021"
+    location: "Birmingham, AL, EEUU"
+    highlights:
+      - "Global Financial Architecture de BBVA USA, on-site"
+      - "Data Governance y Data Quality sobre infraestructura Big Data"
+
+  - role: "Big Data Engineer"
+    company: "Minsait (para Santander)"
+    period: "2018"
+    highlights:
+      - "ETL con Scala/Spark, Cloudera, Hive/Impala"
+
+# ------------------------------------------------------------
+# SKILLS
+# ------------------------------------------------------------
+skills:
+  cloud: [GCP, Azure, AWS, Databricks, Snowflake, Kubernetes, Docker, "CI/CD"]
+  data: [Spark, Scala, Python, SQL, Kafka, "ETL/ELT", "Data Governance",
+         "Data Quality", "API-REST", FastAPI, "event-driven"]
+  ai: [LLMs, RAG, fine-tuning, LangChain, LangGraph, MCP, "sistemas multiagente",
+       evals, guardrails, NLP, "computer vision", "vector DBs", "Claude Code"]
+  viz: ["Power BI", Streamlit, JavaScript]
+  management: ["Program Management", "Solutions Architecture", "Product Ownership",
+               "Stakeholder Management", "Budget Management", "Hiring & Team Building",
+               Agile, Scrum]
+
+# ------------------------------------------------------------
+# L2 — FILTROS DUROS (deterministas, sin LLM)
+# ------------------------------------------------------------
+hard_filters:
+  # Descarte inmediato. Estos no llegan ni a embeddings.
+  disqualifiers:
+    - "Rol 100% IC de coding sin liderazgo ni arquitectura"
+    - "Data Engineer junior o mid"
+    - "BI puro sin estrategia ni equipo"
+    - "Data Scientist / Machine Learning Scientist puro (perfil modelador)"
+    - "Ventas sin componente técnico"
+    - "Soporte técnico o helpdesk"
+    - "Administración pública"
+    - "Reubicación fuera de España como requisito"
+    - "Sector sin componente de datos relevante"
+
+  # Señal roja pero NO descarte: baja el score, no lo elimina.
+  yellow_flags:
+    - "Proceso con live coding challenge de produccion"   # ver known_gaps
+    - "Puesto que reporta a 3+ niveles por encima (CDAIO, CTO de grupo)"
+    - "Viajes > 30%"
+
+  sectors_preferred: [Retail, eCommerce, Fintech, Banca, Tecnología, SaaS,
+                      "Consultoría estratégica", Moda, Lujo, Movilidad, Logística,
+                      "Salud/Seguros con fuerte componente de datos"]
+  sectors_avoid: ["Administración pública", "Hostelería sin tecnología",
+                  "Manufactura sin transformación digital"]
+
+  work_mode:
+    base: "Madrid"
+    hybrid: true
+    remote_ok: true
+    relocation_spain: conditional
+    relocation_abroad: false
+    relocation_condition: |
+      Madrid es la base por defecto. Fuera de Madrid solo se considera si se dan
+      LAS DOS cosas: empresa de primer nivel (marca fuerte o producto de
+      referencia) Y modelo híbrido, no presencial completo. Una oferta fuera de
+      Madrid que no cumpla ambas NO se descarta de plano, pero baja el score.
+
+# ------------------------------------------------------------
+# L3 — ANCLAS SEMÁNTICAS
+# ------------------------------------------------------------
+# Cada ancla se vectoriza por separado. Una oferta puntua por su MEJOR ancla,
+# no por el promedio: asi un match fuerte en una linea no se diluye.
+semantic_anchors:
+  - id: engineering_manager_ia
+    weight: 1.0
+    text: "Engineering Manager de plataforma de datos e IA. Montar y hacer crecer
+           equipo de ingeniería, hiring, performance y carreras, con criterio
+           técnico propio y participación en arquitectura."
+
+  - id: ai_solutions_architect
+    weight: 1.0
+    text: "Arquitecto de soluciones de IA aplicada. Diseño e implantación de
+           sistemas con LLMs, RAG, agentes, evals y guardrails, desde PoC hasta
+           producción, trabajando con cliente o negocio."
+
+  - id: forward_deployed
+    weight: 0.9
+    text: "Forward deployed engineer o AI deployment architect. Desplegar
+           tecnología de IA en el cliente, construir el producto con él,
+           combinando profundidad técnica y relación directa."
+
+  - id: data_ai_program_lead
+    weight: 0.8
+    text: "Lead o Head de Data & AI en empresa mediana o scale-up. Ownership de
+           roadmap, presupuesto y equipo, con ejecución técnica real, no solo
+           gobierno corporativo."
+
+  - id: technical_product_manager
+    weight: 0.7
+    text: "Technical Program Manager o Product Manager de datos e IA. Roadmap,
+           priorización y entrega de producto de datos con stakeholders."
+
+titles_of_interest:
+  - "Engineering Manager (Data / AI / Platform)"
+  - "AI Solutions Architect"
+  - "Applied AI Architect"
+  - "AI Deployment Architect"
+  - "Forward Deployed Engineer"
+  - "Head of Data & AI"
+  - "Head of Architecture"
+  - "Data Platform Lead"
+  - "AI Lead"
+  - "Lead AI Engineer"
+  - "Technical Program Manager"
+  - "Product Manager (Data / AI)"
+  - "Solutions Architect (Data / AI / Cloud)"
+
+# ------------------------------------------------------------
+# L4 — GUÍA PARA EL JUEZ LLM
+# ------------------------------------------------------------
+scoring_guidance:
+  calibration: |
+    Puntúa contra el nivel REAL de Borja, no contra su ambición. Un puesto
+    2 niveles por encima (CDAIO, CTO de grupo, director de 80-150 personas)
+    NO es un 90 porque el dominio encaje: es un 55-60. Ser realista aquí vale
+    más que ser generoso, porque cada falso positivo le cuesta una tarde.
+
+  bonus_signals:
+    - "Construir producto o equipo desde cero"
+    - "Autonomía real, sin dependencias de una plataforma global"
+    - "Equipo propio a cargo"
+    - "Mezcla explícita de liderazgo y profundidad técnica"
+    - "Scale-up con producto propio, o marca reconocida"
+    - "IA aplicada en producción, no investigación"
+
+  penalty_signals:
+    - "Fuera de Madrid sin que la empresa sea de primer nivel, o sin modelo híbrido"
+    - "Gobierno corporativo puro, comités y políticas sin ejecución"
+    - "Ownership financiero de área (OPEX/CAPEX/cash-out) como requisito central"
+    - "Exigencia de 15+ años o de reporte a comité de dirección de grupo"
+    - "Data science puro: modelado, estadística, research"
+    - "IC sin equipo y con salario probablemente inferior al actual"
+
+  known_gaps:
+    - gap: "FinOps y defensa presupuestaria corporativa ante Finanzas"
+      note: "Tiene gestión de presupuesto de programa (1,5M€), no ownership financiero de un área."
+    - gap: "Exposición documentada a comité de dirección"
+      note: "No evidenciada en CV. Penaliza en procesos C-level."
+    - gap: "Código de producción propio en los últimos 5 años"
+      note: "Construye con Claude Code, que no es lo mismo. Los procesos con live
+             challenge de dos horas filtran exactamente esto. Marcar señal roja."
+    - gap: "Antigüedad corta en el puesto actual"
+      note: "Desde marzo de 2026. Exige narrativa en procesos senior."
+
+  compensable_gaps:
+    - gap: "Sector no cubierto"
+      with: "Experiencia cross-sector: retail global en Inditex, banca en BBVA y ING"
+    - gap: "El título no coincide exactamente"
+      with: "Ha ejercido las funciones: equipo, presupuesto, arquitectura y estrategia"
+    - gap: "Piden certificación AWS o GCP"
+      with: "Azure profundo, GCP en el rol actual, multi-cloud demostrable"
+    - gap: "Piden experiencia en startup"
+      with: "Iniciativas propias levantadas dentro de corporaciones, de cero a producción"
+    - gap: "Piden MLOps o data science profundo"
+      with: "Ha entregado ML y LLMs en producción como arquitecto y responsable"
+
+# ------------------------------------------------------------
+# EVIDENCIA — hechos con métrica, para el CV a medida (fase 2)
+# ------------------------------------------------------------
+# Regla: el generador de CV solo puede afirmar cosas que estén aquí.
+evidence:
+  - id: itx_survey_nlp
+    claim: "Análisis NLP de +400K feedbacks con 98,7% de eficacia y retorno de 140k€/año"
+    stack: [Databricks, Snowflake, LLMs, Python]
+  - id: itx_omnitag
+    claim: "Etiquetado multiagente de imágenes: 40K etiquetas, 117 tiendas, 123k€/año"
+    stack: [LangChain, LangGraph, Pinecone, "Azure Functions", LLMs]
+  - id: itx_loca
+    claim: "ITX MyBusiness: 417K actualizaciones, 5,5K localizaciones, ahorro 300k€/año"
+    stack: [Databricks, Snowflake, "microservicios REST"]
+  - id: itx_cx_reviews
+    claim: "+4M opiniones y 2,6M reseñas analizadas, +400 usuarios en portal de autogestión"
+    stack: [Databricks, Snowflake, LLMs, NLP]
+  - id: itx_returns
+    claim: "Categorización de motivos de devolución: +300K etiquetados, 4 cadenas, 110k€/año"
+    stack: [Databricks, Snowflake, LLMs]
+  - id: itx_supply_risk
+    claim: "Supply Chain Risks: 2,8M movimientos, 806K empresas, 2.729 informes automatizados"
+    stack: [Databricks, Snowflake, Spark, Streamlit]
+  - id: itx_peoplecounter
+    claim: "Ingesta en tiempo real de tráfico de tiendas como dato estratégico global"
+    stack: [Snowflake, Kafka, "API-REST", "Power BI"]
+  - id: itx_digital_twin
+    claim: "Gemelo digital de 23 tiendas con análisis de comportamiento en tiempo real"
+    stack: [Snowflake, Kafka, Python]
+  - id: itx_budget
+    claim: "Presupuesto de 1,5M€ gestionado con ROI acumulado de ~4M€"
+  - id: itx_team
+    claim: "Equipo construido de 0 a 10 personas con hiring, mentoring y desarrollo de carrera"
+  - id: ing_chapter
+    claim: "Chapter de 25+ ingenieros en banca regulada bajo DORA, EU AI Act y GDPR"
+  - id: ing_gcp
+    claim: "Migración cloud a GCP y estrategia de IA de ING España y Portugal"
+  - id: bbva_global
+    claim: "Liderazgo técnico global sin dependencia jerárquica en España, México y Colombia"
