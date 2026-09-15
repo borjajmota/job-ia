@@ -208,9 +208,13 @@ def via_a(concepto: str, location: str) -> dict:
         for n in names:
             if n in cols:
                 v = row.get(cols[n])
-                if v is not None and str(v) != "nan":
+                if v is not None and str(v).strip().lower() not in ("nan", "nat"):
                     return str(v)
         return None
+
+    if "date_posted" in cols:
+        raw_samples = df[cols["date_posted"]].head(3).tolist()
+        print(f"  date_posted crudo (JobSpy, sin procesar): {raw_samples}")
 
     jobs = []
     for _, row in df.iterrows():
@@ -279,42 +283,57 @@ def main() -> int:
     report["geo_id"] = geo_id
 
     veredicto_global = True
-    for concepto in args.conceptos:
-        print(f"=== '{concepto}' ===")
-        entry: dict = {}
-
-        a = via_a(concepto, args.location)
-        entry["via_a_jobspy"] = {**evaluate(a["jobs"]), "error": a.get("error")}
-        print(f"  A/JobSpy  -> {entry['via_a_jobspy']}")
-        _sleep()
-
-        if geo_id:
-            try:
-                b = via_b(concepto, geo_id)
-                entry["via_b_guest"] = {
-                    **evaluate(b["jobs"]),
-                    "paginas": b["pages_fetched"],
-                    "paso_pagina": b["page_step_observed"],
-                }
-                entry["muestra"] = b["jobs"][:3]
-            except RateLimited as exc:
-                entry["via_b_guest"] = {"rate_limited": str(exc)}
-                veredicto_global = False
-            print(f"  B/guest   -> {entry['via_b_guest']}")
-
-        ok = entry.get("via_a_jobspy", {}).get("cumple_umbral_15") or entry.get(
-            "via_b_guest", {}
-        ).get("cumple_umbral_15")
-        veredicto_global = veredicto_global and bool(ok)
-        entry["concepto_ok"] = bool(ok)
-        report["resultados"][concepto] = entry
-        print()
-        _sleep()
-
-    report["veredicto"] = "VERDE" if veredicto_global else "ROJO"
     OUT_DIR.mkdir(exist_ok=True)
     path = OUT_DIR / f"{datetime.now().strftime('%Y%m%d-%H%M%S')}.json"
-    path.write_text(json.dumps(report, indent=2, ensure_ascii=False, default=str))
+
+    try:
+        for concepto in args.conceptos:
+            print(f"=== '{concepto}' ===")
+            entry: dict = {}
+
+            a = via_a(concepto, args.location)
+            entry["via_a_jobspy"] = {**evaluate(a["jobs"]), "error": a.get("error")}
+            print(f"  A/JobSpy  -> {entry['via_a_jobspy']}")
+            _sleep()
+
+            if geo_id:
+                try:
+                    b = via_b(concepto, geo_id)
+                    entry["via_b_guest"] = {
+                        **evaluate(b["jobs"]),
+                        "paginas": b["pages_fetched"],
+                        "paso_pagina": b["page_step_observed"],
+                    }
+                    entry["muestra"] = b["jobs"][:3]
+                except RateLimited as exc:
+                    entry["via_b_guest"] = {"rate_limited": str(exc)}
+                    veredicto_global = False
+                print(f"  B/guest   -> {entry['via_b_guest']}")
+
+            via_a_res = entry.get("via_a_jobspy", {})
+            via_b_res = entry.get("via_b_guest", {})
+            # >=15 unicas Y >=5 dentro de 24h: total sin frescura tapa bugs
+            # de parseo de fecha (ver el "NaT" de via_a) tras un falso VERDE.
+            ok = (
+                via_a_res.get("cumple_umbral_15") and via_a_res.get("dentro_de_24h", 0) >= 5
+            ) or (
+                via_b_res.get("cumple_umbral_15") and via_b_res.get("dentro_de_24h", 0) >= 5
+            )
+            veredicto_global = veredicto_global and bool(ok)
+            entry["concepto_ok"] = bool(ok)
+            report["resultados"][concepto] = entry
+            path.write_text(
+                json.dumps(report, indent=2, ensure_ascii=False, default=str),
+                encoding="utf-8",
+            )
+            print()
+            _sleep()
+    finally:
+        report["veredicto"] = "VERDE" if veredicto_global else "ROJO"
+        path.write_text(
+            json.dumps(report, indent=2, ensure_ascii=False, default=str),
+            encoding="utf-8",
+        )
 
     print(f"VEREDICTO DE ESTA CORRIDA: {report['veredicto']}")
     print(f"Guardado en {path}")
