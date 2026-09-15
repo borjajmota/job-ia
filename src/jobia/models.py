@@ -24,6 +24,7 @@ class Job(BaseModel):
     source: str = "linkedin"
     query_id: str | None = None
     description: str | None = None      # se rellena SOLO en L4
+    flags: list[str] = Field(default_factory=list)  # señales amarillas de L2, para L4
 
     @property
     def repost_key(self) -> str:
