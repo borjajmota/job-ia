@@ -10,9 +10,22 @@ CV a medida sobre una oferta concreta sin repetir la busqueda.
 """
 from __future__ import annotations
 
-from typing import Annotated, TypedDict
+import os
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import TypedDict
+
+import yaml
+from langgraph.graph import END, StateGraph
 
 from jobia.models import Job, QueryHealth, RunReport, ScoredJob
+from jobia.notify import email as notify_email
+from jobia.pipeline import rules as rules_pipeline
+from jobia.pipeline import scoring as scoring_pipeline
+from jobia.pipeline import semantic as semantic_pipeline
+from jobia.sources.base import SourceBlocked
+from jobia.sources.linkedin import LinkedInSource
+from jobia.store import Store
 
 
 class GraphState(TypedDict, total=False):
@@ -32,20 +45,179 @@ class GraphState(TypedDict, total=False):
     report: RunReport
 
 
-# --- TODO(claude-code): implementar cada nodo. Contratos en DISENO.md §4 ---
+def _load_yaml(path: str) -> dict:
+    return yaml.safe_load(Path(path).read_text(encoding="utf-8"))
 
-def load_profile(state: GraphState) -> GraphState: ...
-def plan_queries(state: GraphState) -> GraphState: ...
-def fetch_jobs(state: GraphState) -> GraphState: ...      # captura SourceBlocked -> blocked=True
-def filter_new(state: GraphState) -> GraphState: ...      # Store.filter_new
-def apply_rules(state: GraphState) -> GraphState: ...     # L2
-def rank_semantic(state: GraphState) -> GraphState: ...   # L3, top_k
-def enrich_details(state: GraphState) -> GraphState: ...  # unico sitio que baja descripciones
-def score_llm(state: GraphState) -> GraphState: ...       # L4, salida ScoredJob
-def decide(state: GraphState) -> GraphState: ...          # umbral adaptativo
-def notify(state: GraphState) -> GraphState: ...
-def persist(state: GraphState) -> GraphState: ...
-def alert_blocked(state: GraphState) -> GraphState: ...   # email de alarma, NO silencio
+
+def _cache_dir() -> str:
+    return os.environ.get("JOBIA_CACHE_DIR", "data/cache")
+
+
+def _replay() -> bool:
+    return os.environ.get("JOBIA_REPLAY") == "1"
+
+
+def _db_path() -> str:
+    return os.environ.get("JOBIA_DB_PATH", "data/jobia.db")
+
+
+def load_profile(state: GraphState) -> GraphState:
+    profile = _load_yaml("config/profile.yaml")
+    run_id = state.get("run_id") or datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    return {"profile": profile, "profile_version": profile["version"], "run_id": run_id}
+
+
+def plan_queries(state: GraphState) -> GraphState:
+    cfg = _load_yaml("config/searches.yaml")
+    common = {k: cfg[k] for k in ("location", "geo_query", "hours_old", "max_results_per_query")}
+    queries = [{"id": q["id"], "term": q["term"], **common} for q in cfg["queries"]]
+    return {"queries": queries}
+
+
+def fetch_jobs(state: GraphState) -> GraphState:
+    """Captura SourceBlocked -> blocked=True. NUNCA lo traduce en lista vacia
+    silenciosa: eso es exactamente lo que hundio la v1 (CLAUDE.md, regla 1)."""
+    source = LinkedInSource(cache_dir=_cache_dir(), replay=_replay())
+    raw: list[Job] = []
+    health: list[QueryHealth] = []
+    blocked = False
+    for q in state["queries"]:
+        try:
+            jobs = source.search(
+                term=q["term"], query_id=q["id"], location=q["location"],
+                geo_query=q["geo_query"], hours_old=q["hours_old"],
+                limit=q["max_results_per_query"],
+            )
+            health.append(QueryHealth(query_id=q["id"], found=len(jobs), new=0))
+            raw.extend(jobs)
+        except SourceBlocked as exc:
+            blocked = True
+            health.append(QueryHealth(query_id=q["id"], found=0, new=0, error=str(exc)))
+    return {"raw": raw, "health": health, "blocked": blocked}
+
+
+def filter_new(state: GraphState) -> GraphState:
+    """Store.filter_new: L1, novedad via job_id + repost_key."""
+    store = Store(_db_path())
+    new = store.filter_new(state["raw"])
+    new_by_query: dict[str, int] = {}
+    for j in new:
+        new_by_query[j.query_id or ""] = new_by_query.get(j.query_id or "", 0) + 1
+    health = [
+        QueryHealth(query_id=h.query_id, found=h.found,
+                    new=new_by_query.get(h.query_id, 0), error=h.error)
+        for h in state.get("health", [])
+    ]
+    return {"new": new, "health": health}
+
+
+def apply_rules(state: GraphState) -> GraphState:
+    """L2: filtros deterministas de config/rules.yaml."""
+    rules_cfg = _load_yaml("config/rules.yaml")
+    candidates = rules_pipeline.apply(state["new"], rules_cfg)
+    return {"candidates": candidates}
+
+
+def rank_semantic(state: GraphState) -> GraphState:
+    """L3: embeddings locales vs semantic_anchors del perfil, top_k."""
+    rules_cfg = _load_yaml("config/rules.yaml")
+    sem_cfg = rules_cfg["semantic"]
+    shortlist = semantic_pipeline.rank(
+        state["candidates"], state["profile"]["semantic_anchors"],
+        model_name=sem_cfg["model"], top_k=sem_cfg["top_k"],
+        aggregation=sem_cfg["aggregation"],
+    )
+    return {"shortlist": shortlist}
+
+
+def enrich_details(state: GraphState) -> GraphState:
+    """Unico sitio del grafo donde se bajan descripciones completas, y solo
+    para las <=top_k del shortlist (invariante en CLAUDE.md)."""
+    source = LinkedInSource(cache_dir=_cache_dir(), replay=_replay())
+    enriched: list[Job] = []
+    for j in state["shortlist"]:
+        try:
+            desc = source.fetch_description(j)
+        except SourceBlocked:
+            desc = None
+        enriched.append(j.model_copy(update={"description": desc}))
+    return {"shortlist": enriched}
+
+
+def score_llm(state: GraphState) -> GraphState:
+    """L4: Groq, salida ScoredJob validada con pydantic."""
+    scored = scoring_pipeline.score(state["shortlist"], state["profile"]["scoring_guidance"])
+    return {"scored": scored}
+
+
+def decide(state: GraphState) -> GraphState:
+    """Umbral adaptativo (percentil de los ultimos N dias, con suelo)."""
+    rules_cfg = _load_yaml("config/rules.yaml")
+    scoring_cfg = rules_cfg["scoring"]
+    store = Store(_db_path())
+    threshold = store.threshold(
+        scoring_cfg["percentile"], scoring_cfg["floor"], scoring_cfg["lookback_days"]
+    )
+
+    jobs_by_id = {j.job_id: j for j in state["shortlist"]}
+    passed = [s for s in state["scored"] if s.score >= threshold and s.veredicto != "descartar"]
+    passed.sort(key=lambda s: s.score, reverse=True)
+    passed = passed[: scoring_cfg["max_per_email"]]
+
+    digest = []
+    for s in passed:
+        j = jobs_by_id.get(s.job_id)
+        if not j:
+            continue
+        digest.append({
+            "title": j.title, "company": j.company, "location": j.location,
+            "url": j.url, "score": s.score, "match": s.match, "gaps": s.gaps,
+            "señal_roja": s.señal_roja,
+        })
+    return {"threshold": threshold, "digest": digest}
+
+
+def notify(state: GraphState) -> GraphState:
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    digest = state.get("digest", [])
+    if digest:
+        html = notify_email.render_digest(digest, today)
+        n = len(digest)
+        subject = f"job-ia · {today} · {n} oferta{'s' if n != 1 else ''}"
+        notify_email.send(html, subject=subject)
+    return {}
+
+
+def persist(state: GraphState) -> GraphState:
+    store = Store(_db_path())
+    if state.get("scored"):
+        store.save_scores(state["run_id"], state.get("profile_version", 0), state["scored"])
+    report = RunReport(
+        run_id=state["run_id"],
+        started_at=datetime.now(timezone.utc),
+        profile_version=state.get("profile_version", 0),
+        queries=state.get("health", []),
+        n_raw=len(state.get("raw", [])),
+        n_new=len(state.get("new", [])),
+        n_after_rules=len(state.get("candidates", [])),
+        n_scored=len(state.get("scored", [])),
+        n_emailed=len(state.get("digest", [])),
+        threshold_used=state.get("threshold"),
+        blocked=state.get("blocked", False),
+    )
+    store.save_run(report)
+    return {"report": report}
+
+
+def alert_blocked(state: GraphState) -> GraphState:
+    """El email de alarma: la linea de codigo mas valiosa del proyecto
+    (DISENO.md 4.1). Es la correccion directa de los 25 dias perdidos en v1."""
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    reason = ("bloqueo explicito (SourceBlocked) en una o mas queries" if state.get("blocked")
+              else "todas las queries devolvieron 0 resultados")
+    html = notify_email.render_alert(reason, today)
+    notify_email.send(html, subject=f"⚠ job-ia · posible bloqueo · {today}")
+    return {"blocked": True}
 
 
 def route_after_fetch(state: GraphState) -> str:
@@ -63,6 +235,39 @@ def route_after_fetch(state: GraphState) -> str:
 
 
 def build_graph(checkpointer=None):
-    """TODO(claude-code): StateGraph(GraphState), add_node por cada funcion,
-    add_conditional_edges("fetch_jobs", route_after_fetch), compile(checkpointer)."""
-    raise NotImplementedError
+    g = StateGraph(GraphState)
+
+    for name, fn in [
+        ("load_profile", load_profile),
+        ("plan_queries", plan_queries),
+        ("fetch_jobs", fetch_jobs),
+        ("filter_new", filter_new),
+        ("apply_rules", apply_rules),
+        ("rank_semantic", rank_semantic),
+        ("enrich_details", enrich_details),
+        ("score_llm", score_llm),
+        ("decide", decide),
+        ("notify", notify),
+        ("persist", persist),
+        ("alert_blocked", alert_blocked),
+    ]:
+        g.add_node(name, fn)
+
+    g.set_entry_point("load_profile")
+    g.add_edge("load_profile", "plan_queries")
+    g.add_edge("plan_queries", "fetch_jobs")
+    g.add_conditional_edges(
+        "fetch_jobs", route_after_fetch,
+        {"filter_new": "filter_new", "alert_blocked": "alert_blocked"},
+    )
+    g.add_edge("filter_new", "apply_rules")
+    g.add_edge("apply_rules", "rank_semantic")
+    g.add_edge("rank_semantic", "enrich_details")
+    g.add_edge("enrich_details", "score_llm")
+    g.add_edge("score_llm", "decide")
+    g.add_edge("decide", "notify")
+    g.add_edge("notify", "persist")
+    g.add_edge("persist", END)
+    g.add_edge("alert_blocked", "persist")
+
+    return g.compile(checkpointer=checkpointer)

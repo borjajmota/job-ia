@@ -166,7 +166,7 @@ class LinkedInSource(JobSource):
     def fetch_description(self, job: Job) -> str | None:
         cached = self.cache / f"desc_{job.job_id}.txt"
         if cached.exists():
-            return cached.read_text()
+            return cached.read_text(encoding="utf-8")
         if self.replay:
             return None
         r = http.get(f"{GUEST}/jobs/api/jobPosting/{job.job_id}", headers=HEADERS,
@@ -176,7 +176,7 @@ class LinkedInSource(JobSource):
         if r.status_code != 200:
             return None
         text = BeautifulSoup(r.text, "html.parser").get_text(" ", strip=True)[:12000]
-        cached.write_text(text)
+        cached.write_text(text, encoding="utf-8")
         _pause()
         return text
 
