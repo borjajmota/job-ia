@@ -44,7 +44,12 @@ class GraphState(TypedDict, total=False):
     health: list[QueryHealth]
     blocked: bool
     notes: list[str]
+    kill_breakdown: dict[str, int]
     report: RunReport
+    # Cableado para corridas manuales desde el dashboard (2026-09-17):
+    run_type: str             # "scheduled" | "manual"
+    hours_old_override: int   # ventana de publicacion: 24 / 168 / 720
+    save_to_dedupe: bool      # False = exploracion, no escribe en job_seen
 
 
 def _load_yaml(path: str) -> dict:
@@ -72,6 +77,8 @@ def load_profile(state: GraphState) -> GraphState:
 def plan_queries(state: GraphState) -> GraphState:
     cfg = _load_yaml("config/searches.yaml")
     common = {k: cfg[k] for k in ("location", "geo_query", "hours_old", "max_results_per_query")}
+    if state.get("hours_old_override"):
+        common["hours_old"] = state["hours_old_override"]
     queries = [{"id": q["id"], "term": q["term"], **common} for q in cfg["queries"]]
     return {"queries": queries}
 
@@ -128,7 +135,7 @@ def _dead_query_notes(health: list[QueryHealth]) -> list[str]:
 def filter_new(state: GraphState) -> GraphState:
     """Store.filter_new: L1, novedad via job_id + repost_key."""
     store = Store(_db_path())
-    new = store.filter_new(state["raw"])
+    new = store.filter_new(state["raw"], persist=state.get("save_to_dedupe", True))
     new_by_query: dict[str, int] = {}
     for j in new:
         new_by_query[j.query_id or ""] = new_by_query.get(j.query_id or "", 0) + 1
@@ -143,8 +150,8 @@ def filter_new(state: GraphState) -> GraphState:
 def apply_rules(state: GraphState) -> GraphState:
     """L2: filtros deterministas de config/rules.yaml."""
     rules_cfg = _load_yaml("config/rules.yaml")
-    candidates = rules_pipeline.apply(state["new"], rules_cfg)
-    return {"candidates": candidates}
+    candidates, kill_breakdown = rules_pipeline.apply(state["new"], rules_cfg)
+    return {"candidates": candidates, "kill_breakdown": kill_breakdown}
 
 
 def rank_semantic(state: GraphState) -> GraphState:
@@ -253,10 +260,18 @@ def persist(state: GraphState) -> GraphState:
     store = Store(_db_path())
     if state.get("scored"):
         store.save_scores(state["run_id"], state.get("profile_version", 0), state["scored"])
+    # run_id ya lleva el timestamp de arranque (load_profile); antes este
+    # started_at se recalculaba aqui con datetime.now(), asi que "duracion"
+    # siempre salia ~0 -- persist() corre al final, no al principio.
+    started_at = datetime.strptime(state["run_id"], "%Y%m%d-%H%M%S").replace(tzinfo=UTC)
     report = RunReport(
         run_id=state["run_id"],
-        started_at=datetime.now(UTC),
+        started_at=started_at,
+        finished_at=datetime.now(UTC),
         profile_version=state.get("profile_version", 0),
+        run_type=state.get("run_type", "scheduled"),
+        hours_old=state.get("hours_old_override") or 24,
+        saved_to_dedupe=state.get("save_to_dedupe", True),
         queries=state.get("health", []),
         n_raw=len(state.get("raw", [])),
         n_new=len(state.get("new", [])),
@@ -266,6 +281,7 @@ def persist(state: GraphState) -> GraphState:
         threshold_used=state.get("threshold"),
         blocked=state.get("blocked", False),
         notes=state.get("notes", []),
+        kill_breakdown=state.get("kill_breakdown", {}),
     )
     store.save_run(report)
     return {"report": report}

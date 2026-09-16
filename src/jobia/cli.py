@@ -14,6 +14,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 import yaml
+from dotenv import load_dotenv
 from langgraph.checkpoint.sqlite import SqliteSaver
 
 from jobia.graph import GraphState, build_graph
@@ -42,15 +43,20 @@ def cmd_run(args: argparse.Namespace) -> int:
     Path(_checkpoint_path()).parent.mkdir(parents=True, exist_ok=True)
     run_id = datetime.now(UTC).strftime("%Y%m%d-%H%M%S")
 
+    initial_state: GraphState = {
+        "run_id": run_id,
+        "profile_version": _load_profile_version(),
+        "run_type": args.run_type,
+        "save_to_dedupe": not args.no_dedupe,
+    }
+    if args.hours_old:
+        initial_state["hours_old_override"] = args.hours_old
+
     # El checkpointer permite reanudar una corrida cortada a mitad (p.ej. un
     # 429 que ni siquiera SourceBlocked llega a capturar) sin tener que
     # repetir las queries ya hechas desde cero.
     with SqliteSaver.from_conn_string(_checkpoint_path()) as checkpointer:
         graph = build_graph(checkpointer=checkpointer)
-        initial_state: GraphState = {
-            "run_id": run_id,
-            "profile_version": _load_profile_version(),
-        }
         final_state = graph.invoke(
             initial_state, config={"configurable": {"thread_id": run_id}}
         )
@@ -82,12 +88,30 @@ def build_parser() -> argparse.ArgumentParser:
         "--force", action="store_true",
         help="Ignora el guard de 'ya corrio hoy sin bloqueo' y ejecuta igualmente.",
     )
+    run_parser.add_argument(
+        "--hours-old", type=int, default=None,
+        help="Ventana de antiguedad de publicacion en horas (24=diaria, 168=semanal, "
+             "720=mensual). Por defecto, el hours_old de config/searches.yaml.",
+    )
+    run_parser.add_argument(
+        "--no-dedupe", action="store_true",
+        help="No escribe en job_seen: exploracion que el proceso diario no vera "
+             "como 'ya vista'. Las tablas runs/scores si se guardan igual.",
+    )
+    run_parser.add_argument(
+        "--run-type", choices=["scheduled", "manual"], default="scheduled",
+        help="Etiqueta la corrida en el historial (dashboard la pasa como 'manual').",
+    )
     run_parser.set_defaults(func=cmd_run)
 
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
+    # No-op si no hay .env (caso normal en Actions, donde los secrets ya
+    # llegan como variables de entorno reales). python-dotenv estaba
+    # declarado como dependencia desde el principio pero nunca se usaba.
+    load_dotenv()
     parser = build_parser()
     args = parser.parse_args(argv)
     return args.func(args)

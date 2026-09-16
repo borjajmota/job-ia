@@ -102,6 +102,48 @@ def test_consecutive_empty(tmp_path):
     assert store.consecutive_empty("ai", 4) is False
 
 
+def test_filter_new_sin_persist_no_escribe_en_job_seen(tmp_path):
+    """Corrida manual 'exploracion' (dashboard, save_to_dedupe=False): debe
+    seguir detectando novedad, pero no debe dejar rastro en job_seen -- si
+    no, el proceso diario de mañana la trataria como ya vista."""
+    store = Store(tmp_path / "jobia.db")
+    jobs = [_job("1", title="Head of Data", company="Acme")]
+
+    primera = store.filter_new(jobs, persist=False)
+    assert len(primera) == 1
+
+    segunda = store.filter_new(jobs, persist=True)
+    assert len(segunda) == 1  # si la primera hubiera persistido, aqui saldria 0
+
+
+def test_filter_new_con_persist_si_deja_rastro(tmp_path):
+    store = Store(tmp_path / "jobia.db")
+    jobs = [_job("1", title="Head of Data", company="Acme")]
+    store.filter_new(jobs, persist=True)
+    assert store.filter_new(jobs, persist=True) == []
+
+
+def test_list_runs(tmp_path):
+    store = Store(tmp_path / "jobia.db")
+    store.save_run(RunReport(run_id="20260917-090000", started_at=datetime.now(UTC),
+                              profile_version=1, n_new=5))
+    store.save_run(RunReport(run_id="20260917-100000", started_at=datetime.now(UTC),
+                              profile_version=1, n_new=3))
+    runs = store.list_runs()
+    assert [r.run_id for r in runs] == ["20260917-100000", "20260917-090000"]
+
+
+def test_top_companies(tmp_path):
+    store = Store(tmp_path / "jobia.db")
+    store.filter_new([
+        _job("1", title="A", company="Acme"),
+        _job("2", title="B", company="Acme"),
+        _job("3", title="C", company="Otra"),
+    ])
+    top = store.top_companies()
+    assert top[0] == ("Acme", 2)
+
+
 def test_consecutive_empty_false_si_alguna_tuvo_resultados(tmp_path):
     store = Store(tmp_path / "jobia.db")
     store.save_run(RunReport(

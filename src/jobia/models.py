@@ -55,7 +55,11 @@ class RunReport(BaseModel):
     """Lo que se persiste de cada corrida. Es la memoria operativa del sistema."""
     run_id: str
     started_at: datetime
+    finished_at: datetime | None = None
     profile_version: int
+    run_type: Literal["scheduled", "manual"] = "scheduled"
+    hours_old: int = 24
+    saved_to_dedupe: bool = True        # False = exploracion, no toco job_seen
     queries: list[QueryHealth] = []
     n_raw: int = 0
     n_new: int = 0
@@ -65,3 +69,7 @@ class RunReport(BaseModel):
     threshold_used: int | None = None
     blocked: bool = False               # bandera de bloqueo de LinkedIn
     notes: list[str] = []
+    # Cuantas ofertas mato cada regla de L2 (p.ej. "R1:ventas_vendor": 12,
+    # "R3": 40, "R4:carnica": 8) -- para el dashboard, sin guardar cada
+    # oferta individual todavia (eso es fast-follow).
+    kill_breakdown: dict[str, int] = {}

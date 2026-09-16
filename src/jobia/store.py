@@ -54,9 +54,14 @@ class Store:
         self.db.commit()
 
     # ---------- L1: novedad ----------
-    def filter_new(self, jobs: list[Job]) -> list[Job]:
+    def filter_new(self, jobs: list[Job], persist: bool = True) -> list[Job]:
         """Nuevo = job_id desconocido Y repost_key desconocida.
-        Lo segundo evita que la misma oferta republicada te llegue cada semana."""
+        Lo segundo evita que la misma oferta republicada te llegue cada semana.
+
+        persist=False (corrida manual "exploracion" desde el dashboard):
+        se sigue comprobando contra lo ya visto, pero no se escribe nada en
+        job_seen -- el proceso diario de mañana no debe saber que esto
+        paso, ni descartar estas ofertas por haberlas visto aqui."""
         now = datetime.now(UTC).isoformat()
         new: list[Job] = []
         for j in jobs:
@@ -64,15 +69,18 @@ class Store:
                 "SELECT 1 FROM job_seen WHERE job_id=? OR repost_key=?",
                 (j.job_id, j.repost_key)).fetchone()
             if row:
-                self.db.execute("UPDATE job_seen SET last_seen=? WHERE job_id=?",
-                                (now, j.job_id))
+                if persist:
+                    self.db.execute("UPDATE job_seen SET last_seen=? WHERE job_id=?",
+                                    (now, j.job_id))
                 continue
-            self.db.execute(
-                "INSERT OR IGNORE INTO job_seen VALUES (?,?,?,?,?,?,?,?,?,?)",
-                (j.job_id, j.repost_key, j.title, j.company, j.location, j.url,
-                 j.query_id, j.posted_at.isoformat() if j.posted_at else None, now, now))
+            if persist:
+                self.db.execute(
+                    "INSERT OR IGNORE INTO job_seen VALUES (?,?,?,?,?,?,?,?,?,?)",
+                    (j.job_id, j.repost_key, j.title, j.company, j.location, j.url,
+                     j.query_id, j.posted_at.isoformat() if j.posted_at else None, now, now))
             new.append(j)
-        self.db.commit()
+        if persist:
+            self.db.commit()
         return new
 
     # ---------- umbral adaptativo ----------
@@ -114,3 +122,18 @@ class Store:
         return self.db.execute(
             "SELECT 1 FROM runs WHERE run_id LIKE ? AND blocked=0", (f"{today}%",)
         ).fetchone() is not None
+
+    # ---------- dashboard ----------
+    def list_runs(self, limit: int = 200) -> list[RunReport]:
+        rows = self.db.execute(
+            "SELECT report FROM runs ORDER BY run_id DESC LIMIT ?", (limit,)
+        ).fetchall()
+        return [RunReport.model_validate_json(r["report"]) for r in rows]
+
+    def top_companies(self, limit: int = 20) -> list[tuple[str, int]]:
+        rows = self.db.execute(
+            "SELECT company, COUNT(*) AS n FROM job_seen "
+            "WHERE company IS NOT NULL AND company != '' "
+            "GROUP BY company ORDER BY n DESC LIMIT ?", (limit,)
+        ).fetchall()
+        return [(r["company"], r["n"]) for r in rows]

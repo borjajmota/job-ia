@@ -45,6 +45,19 @@ con `[]` esta reintroduciendo el bug que mato a la v1. Usa `SourceBlocked`.
   salta.
 - El checkpointer de LangGraph (`SqliteSaver`, cableado en `cli.py`) permite
   reanudar una corrida cortada a mitad sin repetir las queries ya hechas.
+- `jobia` carga `.env` si existe (python-dotenv, declarado desde el
+  principio pero sin usar hasta el 2026-09-17). No afecta a Actions (los
+  secrets llegan como variables de entorno reales, no hay `.env` en el
+  checkout del runner).
+
+## Dashboard
+`streamlit run src/jobia/dashboard/app.py` (o `scripts/dashboard.ps1`, que
+ya apunta `JOBIA_DB_PATH`/`JOBIA_CHECKPOINT_PATH` a la BD real del runner).
+Solo escucha en localhost (`.streamlit/config.toml`) -- no lo cambies sin
+querer exponerlo fuera de este PC. Historial de corridas, KPIs, lanzar una
+corrida manual (ventana 24h/7d/30d, con o sin guardar en `job_seen`) y
+configuracion de `searches.yaml`/`rules.yaml` (los valores simples; el
+arbol completo de `title_rules` R0-R6 sigue siendo solo de archivo).
 
 ## Estilo
 - Python 3.11+, type hints, pydantic v2, ruff (linea 100).

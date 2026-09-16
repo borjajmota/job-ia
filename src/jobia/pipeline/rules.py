@@ -159,14 +159,34 @@ def score_title(title: str, company: str, title_rules: dict) -> tuple[str, int, 
     return band, score, reasons
 
 
-def apply(jobs: list[Job], rules: dict) -> list[Job]:
+def _kill_bucket(reasons: list[str]) -> str:
+    """Reduce las razones de score_title a una etiqueta corta para el
+    desglose del dashboard (RunReport.kill_breakdown). Los kills de R1-R4
+    devuelven una sola razon (ver score_title); si el kill llego por
+    puntuacion (R6) hay varias y la ultima es la que importa."""
+    first = reasons[0]
+    if first.startswith("R1 kill_credential/"):
+        return f"R1:{first.split('/', 1)[1].split(':', 1)[0]}"
+    if first.startswith("R2"):
+        return "R2"
+    if first.startswith("R3"):
+        return "R3"
+    if first.startswith("R4 empresa/"):
+        return f"R4:{first.split('/', 1)[1].split(':', 1)[0]}"
+    return "R6:score_bajo"
+
+
+def apply(jobs: list[Job], rules: dict) -> tuple[list[Job], dict[str, int]]:
     title_rules = rules["title_rules"]
     yellow_flag = [re.compile(p) for p in rules.get("yellow_flag_regex", [])]
 
     out: list[Job] = []
+    kill_breakdown: dict[str, int] = {}
     for j in jobs:
         band, score, reasons = score_title(j.title or "", j.company or "", title_rules)
         if band == "KILL":
+            bucket = _kill_bucket(reasons)
+            kill_breakdown[bucket] = kill_breakdown.get(bucket, 0) + 1
             continue
 
         j.flags.extend(f"L2 {r}" for r in reasons)
@@ -177,4 +197,4 @@ def apply(jobs: list[Job], rules: dict) -> list[Job]:
                 j.flags.append(f"L2 yellow_flag: coincide '{p.pattern}' en titulo")
 
         out.append(j)
-    return out
+    return out, kill_breakdown

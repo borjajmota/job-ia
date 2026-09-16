@@ -3,9 +3,11 @@ conversacion de diseño): valida que las 5 ofertas irrelevantes que llegaron
 al LLM esa corrida se descartan ahora en L2, sin gastar nada."""
 from __future__ import annotations
 
-from jobia.pipeline.rules import load_rules, score_title
+from jobia.models import Job
+from jobia.pipeline.rules import apply, load_rules, score_title
 
 RULES = load_rules()["title_rules"]
+FULL_RULES = load_rules()
 
 
 def _band(title: str, company: str) -> str:
@@ -84,3 +86,23 @@ def test_ofertas_curadas_a_mano_no_mueren():
     for title, company in REAL_EXAMPLES_2026_09_16:
         band = _band(title, company)
         assert band != "KILL", f"{title!r} ({company}) no deberia morir en L2"
+
+
+def _j(job_id, title, company):
+    return Job(job_id=job_id, title=title, company=company,
+               url=f"https://www.linkedin.com/jobs/view/{job_id}")
+
+
+def test_apply_desglosa_bajas_por_regla():
+    jobs = [
+        _j("1", "IT Application & Integration Specialist", "Atradius"),  # R3
+        _j("2", "Arquitecto/a Salesforce", "Inetum"),                    # R4:carnica
+        _j("3", "AI Engineer", "Jobgether"),                             # R3
+        _j("4", "Head of Data", "Acme"),                                 # sobrevive
+    ]
+    survivors, breakdown = apply(jobs, FULL_RULES)
+    assert len(survivors) == 1
+    assert survivors[0].job_id == "4"
+    assert breakdown["R3"] == 2
+    assert breakdown["R4:carnica"] == 1
+    assert sum(breakdown.values()) == 3
