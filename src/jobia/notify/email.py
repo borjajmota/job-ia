@@ -10,12 +10,26 @@ Dos plantillas:
 from __future__ import annotations
 
 import os
+import re
 import smtplib
 import sys
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 from jinja2 import BaseLoader, Environment, select_autoescape
+
+# Autoescape de Jinja ya impide inyectar tags/comillas via titulo, empresa,
+# match, gaps o señal_roja (dato de LinkedIn/LLM, no confiable). Pero un
+# href="{{ j.url }}" no valida el ESQUEMA: un "javascript:..." no rompe
+# ninguna comilla y aun asi queda como enlace clicable. j.url hoy siempre
+# se reconstruye en linkedin.py como https://www.linkedin.com/jobs/view/
+# <digitos>, pero esa garantia vive en otro archivo -- se revalida aqui,
+# en el punto de renderizado, en vez de confiar en que siga siendo asi.
+_SAFE_JOB_URL_RE = re.compile(r"^https://www\.linkedin\.com/jobs/view/\d+/?$")
+
+
+def _safe_url(url: object) -> str | None:
+    return url if isinstance(url, str) and _SAFE_JOB_URL_RE.match(url) else None
 
 _FONT = ("-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,"
          "sans-serif")
@@ -108,6 +122,7 @@ _DIGEST_TEMPLATE = f"""\
               </div>
               {{% endif %}}
 
+              {{% if j.url %}}
               <div style="margin-top:17px;">
                 <a href="{{{{ j.url }}}}" style="display:inline-block;font-size:13px;font-weight:600;
                    color:#ffffff;background:#141416;text-decoration:none;padding:9px 18px;
@@ -115,6 +130,7 @@ _DIGEST_TEMPLATE = f"""\
                   Ver oferta →
                 </a>
               </div>
+              {{% endif %}}
 
             </td></tr>
           </table>
@@ -213,8 +229,9 @@ _env = Environment(loader=BaseLoader(), autoescape=select_autoescape(["html"]))
 
 
 def render_digest(jobs: list[dict], today: str, notes: list[str] | None = None) -> str:
+    safe_jobs = [{**j, "url": _safe_url(j.get("url"))} for j in jobs]
     return _env.from_string(_DIGEST_TEMPLATE).render(
-        jobs=jobs, today=today, n=len(jobs), notes=notes or [])
+        jobs=safe_jobs, today=today, n=len(jobs), notes=notes or [])
 
 
 def render_alert(reason: str, today: str) -> str:
