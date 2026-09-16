@@ -1,0 +1,10 @@
+# Decision explicita (2026-09-17): el dashboard solo se accede desde este
+# PC. Streamlit por defecto escucha en 0.0.0.0 (todas las interfaces) y
+# hasta anuncia una "External URL" con la IP publica del router -- sin este
+# archivo, cualquiera que llegara a ese puerto desde fuera vería datos
+# reales y podria disparar una corrida contra LinkedIn.
+[server]
+address = "localhost"
+
+[browser]
+gatherUsageStats = false
