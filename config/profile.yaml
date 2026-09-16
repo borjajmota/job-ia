@@ -196,50 +196,114 @@ titles_of_interest:
 # L4 — GUÍA PARA EL JUEZ LLM
 # ------------------------------------------------------------
 scoring_guidance:
-  calibration: |
-    Puntúa contra el nivel REAL de Borja, no contra su ambición. Un puesto
-    2 niveles por encima (CDAIO, CTO de grupo, director de 80-150 personas)
-    NO es un 90 porque el dominio encaje: es un 55-60. Ser realista aquí vale
-    más que ser generoso, porque cada falso positivo le cuesta una tarde.
+  # 2026-09-16: perfil_candidato sustituye a calibration/bonus_signals/
+  # penalty_signals. Documento redactado por el usuario especificamente
+  # para el juez LLM, con su propia seccion de reglas de evaluacion (esa
+  # seccion 7 del original no se usa aqui: el pipeline sigue devolviendo
+  # ScoredJob en escala 0-100 con match/gaps/señal_roja, no el 0-10 /
+  # si-dudoso-no / motivo / carencias del documento original -- decision
+  # explicita: mantener el esquema actual, cambiar solo el contenido).
+  perfil_candidato: |
+    Usa SOLO la información de este perfil para evaluar la oferta. No
+    supongas experiencia, certificaciones ni tecnologías que no aparezcan
+    aquí. Si la oferta no da un dato necesario para decidir, dilo como
+    "no especificado" en vez de asumirlo.
 
-  bonus_signals:
-    - "Construir producto o equipo desde cero"
-    - "Autonomía real, sin dependencias de una plataforma global"
-    - "Equipo propio a cargo"
-    - "Mezcla explícita de liderazgo y profundidad técnica"
-    - "Scale-up con producto propio, o marca reconocida"
-    - "IA aplicada en producción, no investigación"
+    RESUMEN
+    10+ años en datos: 5 como Data Engineer y 5 como Solutions Architect /
+    Program Manager. Especialidad: plataformas de datos e IA en cloud, en
+    entornos regulados (banca) y de gran escala (retail global). Puesto
+    actual: Head of Cloud & AI Transformation (Chapter Lead) en ING España
+    y Portugal (desde 03/2026). Nivel: manager / lead senior -- NO es
+    C-level ni director global con cientos de personas a cargo. Ubicación:
+    Madrid. Idiomas: español nativo, inglés C1. Formación: Ingeniería de
+    Telecomunicaciones (Telemática), UPM.
 
-  penalty_signals:
-    - "Fuera de Madrid sin que la empresa sea de primer nivel, o sin modelo híbrido"
-    - "Gobierno corporativo puro, comités y políticas sin ejecución"
-    - "Ownership financiero de área (OPEX/CAPEX/cash-out) como requisito central"
-    - "Exigencia de 15+ años o de reporte a comité de dirección de grupo"
-    - "Data science puro: modelado, estadística, research"
-    - "IC sin equipo y con salario probablemente inferior al actual"
+    EXPERIENCIA
+    - 2026-hoy, ING España y Portugal, Head of Cloud & AI Transformation:
+      plataforma GCP (landing zones, seguridad, controles regulatorios),
+      migración on-prem -> cloud, estrategia de IA empresarial, diseño de
+      LLM gateway, equipo de 25+ ingenieros. DORA, EU AI Act, GDPR.
+    - 2022-2026, Inditex, Delivery Program Manager & Solutions Architect
+      (Data & AI): equipo de 10+, presupuesto 1,5M€, 30+ iniciativas de
+      PoC a producción, PoCs de LLM/RAG/fine-tuning con ROI de 4M€. Áreas:
+      Operaciones, Riesgos, CX, Omnicanal.
+    - 2021-2022, Bluetab (cliente BBVA), Data Team Lead: líder técnico
+      global de datos del producto digital en España, México y Colombia.
+    - 2018-2021, Bluetab (cliente BBVA USA), Data Engineer: pipelines
+      Spark/Scala, gobierno del dato. Trabajó en EE. UU.
+    - 2018, Indra (cliente Santander), Data Engineer: ETL Big Data
+      (Scala/Spark), Cloudera, Hive/Impala, CI/CD.
 
-  known_gaps:
-    - gap: "FinOps y defensa presupuestaria corporativa ante Finanzas"
-      note: "Tiene gestión de presupuesto de programa (1,5M€), no ownership financiero de un área."
-    - gap: "Exposición documentada a comité de dirección"
-      note: "No evidenciada en CV. Penaliza en procesos C-level."
-    - gap: "Código de producción propio en los últimos 5 años"
-      note: "Construye con Claude Code, que no es lo mismo. Los procesos con live
-             challenge de dos horas filtran exactamente esto. Marcar señal roja."
-    - gap: "Antigüedad corta en el puesto actual"
-      note: "Desde marzo de 2026. Exige narrativa en procesos senior."
+    COMPETENCIAS
+    Cloud: Azure (fuerte), GCP, Databricks, Snowflake.
+    IA: LLMs, RAG, fine-tuning, agentes (MCP), LLM gateways, IA
+    generativa en producción.
+    Datos: Spark, Scala, Python, FastAPI, ETL, gobierno del dato.
+    Gestión: dirección de equipos, creación de equipos desde cero,
+    contratación (hiring), program/delivery management, product
+    ownership, stakeholders, presupuestos.
+    Herramientas de adopción de IA: Copilot M365, GitHub Copilot, Claude
+    Code, Codex.
+    NO es su perfil: data scientist / investigación ML, analista BI puro,
+    desarrollador frontend/móvil, SAP, ciberseguridad pura, ventas.
 
-  compensable_gaps:
-    - gap: "Sector no cubierto"
-      with: "Experiencia cross-sector: retail global en Inditex, banca en BBVA y ING"
-    - gap: "El título no coincide exactamente"
-      with: "Ha ejercido las funciones: equipo, presupuesto, arquitectura y estrategia"
-    - gap: "Piden certificación AWS o GCP"
-      with: "Azure profundo, GCP en el rol actual, multi-cloud demostrable"
-    - gap: "Piden experiencia en startup"
-      with: "Iniciativas propias levantadas dentro de corporaciones, de cero a producción"
-    - gap: "Piden MLOps o data science profundo"
-      with: "Ha entregado ML y LLMs en producción como arquitecto y responsable"
+    QUÉ BUSCA (encaja)
+    Roles de liderazgo técnico o gestión en datos, cloud o IA: Head/Lead/
+    Manager de Data, AI, Cloud o Plataforma; Manager de equipo de
+    soluciones / Solutions Manager; Engineering Manager (equipos de datos
+    o IA); Lead AI Engineer, AI/Solutions/Data Architect senior, AI
+    Deployment Architect; Product Manager técnico de Data & AI; Head of
+    Architecture; roles orientados a dar soluciones técnicas al negocio
+    (solutions-to-business); roles con componente de migración a cloud
+    aunque sea una parte menor del puesto.
+
+    Prioriza (suma puntos): construir producto o plataforma frente a
+    gobierno corporativo o solo estrategia; crear o hacer crecer un
+    equipo desde cero con autonomía real, incluyendo contratación; IA
+    generativa / agentes aplicados en producción; empresas tecnológicas,
+    seguros o grandes corporaciones. Banca es sector menos buscado --
+    resta prioridad frente a otros sectores, pero no descarta.
+
+    QUÉ NO BUSCA (descarta)
+    Roles junior o mid (Data Engineer, Analyst, Developer sin liderazgo).
+    Roles centrados en data science, modelado estadístico o
+    investigación. Roles muy por encima de su nivel (CDO/CTO/CIO de gran
+    grupo, VP global). Roles 100% comerciales / preventa completa (cuota
+    de ventas, sin componente técnico ni de entrega) -- un componente
+    puntual de preventa dentro de un rol técnico SÍ encaja. Tecnologías
+    ajenas como núcleo del puesto (SAP, Salesforce, mainframe, etc.).
+    Ofertas que exijan idiomas distintos de español o inglés.
+
+    UBICACIÓN Y MODALIDAD
+    Madrid (presencial, híbrido o remoto): encaja. Remoto desde España:
+    encaja. Fuera de Madrid: solo encaja bien si la empresa es de primer
+    nivel Y el modelo es híbrido. Si falta alguna de las dos condiciones,
+    resta puntos pero NO descarta automáticamente.
+
+  # No estaban en el documento de arriba, no lo contradicen: se mantienen
+  # porque en la prueba real del 2026-09-16 contra Groq el LLM las citó
+  # correctamente como señal_roja/gap en varias ofertas reales.
+  notas_calibracion_adicionales: |
+    - FinOps y defensa presupuestaria corporativa ante Finanzas: tiene
+      gestión de presupuesto de programa (1,5M€), no ownership financiero
+      de un área -- no tratar como equivalente.
+    - Exposición documentada a comité de dirección: no evidenciada.
+      Penaliza en procesos que la exigen explícitamente.
+    - Código de producción propio en los últimos 5 años: construye con
+      Claude Code, que no es lo mismo. Los procesos con live coding
+      challenge de producción filtran exactamente esto -- si la oferta
+      lo exige, es candidato claro a señal_roja.
+    - Antigüedad corta en el puesto actual (desde marzo de 2026): exige
+      narrativa en procesos que valoran estabilidad.
+    - Compensaciones válidas: sector no cubierto se compensa con
+      experiencia cross-sector (retail en Inditex, banca en BBVA e ING);
+      título que no coincide exactamente se compensa si ya ha ejercido
+      esas funciones; piden certificación cloud concreta se compensa con
+      Azure profundo + GCP en el rol actual; piden experiencia en startup
+      se compensa con iniciativas propias de cero a producción dentro de
+      corporaciones; piden MLOps o data science profundo se compensa con
+      LLMs entregados en producción como arquitecto/responsable.
 
 # ------------------------------------------------------------
 # EVIDENCIA — hechos con métrica, para el CV a medida (fase 2)
