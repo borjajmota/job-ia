@@ -216,7 +216,12 @@ yellow_flag_regex:
 
 semantic:
   model: "intfloat/multilingual-e5-base"   # local, gratis, bilingue es/en
-  top_k: 18
+  # 2026-09-16: null = sin tope, pasan todas las que sobrevivan L2. Antes
+  # era 18 y descartaba en base a similitud de titulo+empresa (la señal
+  # mas debil del embudo) justo lo que L2 (R0-R6, mas rico) ya habia
+  # dejado pasar. Ahora rank_semantic solo ordena, no excluye -- la
+  # precision real la da L2 antes y el LLM en L4 despues.
+  top_k: null
   # Una oferta puntua por su MEJOR ancla, no por el promedio: asi un match
   # fuerte en una linea no se diluye con las otras cuatro.
   aggregation: max

@@ -6,14 +6,16 @@
 # en vez de intentar que la query ya venga precisa). La precision ahora la
 # ponen title_rules (R0-R6) en config/rules.yaml, no la query.
 #
-# max_results_per_query sube de 50 a 100, pero el volumen real lo sigue
-# acotando hours_old=24: en Madrid, en 24h, ningun termino de esta lista va
-# a agotar ese techo. No se deja sin limite (aunque se pidio) para no
-# depender de que jobspy pagine bien un "infinito".
+# max_results_per_query: jobspy exige un entero (no admite "sin limite"),
+# asi que 1000 hace ese papel -- el limite real lo ponen hours_old=24 +
+# localizacion + el dedupe de L1 por job_id/repost_key, no este numero.
+# Paginar mas resultados de BUSQUEDA (listas) es mucho mas barato en
+# riesgo de bloqueo que bajar mas paginas de DETALLE por oferta (eso lo
+# acota L2/L3->L4, ver rules.yaml).
 location: "Madrid, Community of Madrid, Spain"
 geo_query: "Madrid"
 hours_old: 24
-max_results_per_query: 100
+max_results_per_query: 1000
 
 queries:
   - id: ai

@@ -34,10 +34,12 @@ def rank(
     jobs: list[Job],
     anchors: list[dict],
     model_name: str,
-    top_k: int,
+    top_k: int | None,
     aggregation: str = "max",
 ) -> list[Job]:
-    """Devuelve hasta top_k jobs, ordenados de mas a menos afines al perfil."""
+    """Ordena de mas a menos afin al perfil. Si top_k es None, no recorta:
+    devuelve todos (2026-09-16, decision explicita -- el filtrado real ya
+    lo hace L2/R0-R6, este ranking es para orden, no para exclusion)."""
     if not jobs:
         return []
     if aggregation != "max":
@@ -58,4 +60,5 @@ def rank(
         scored.append((best, j))
 
     scored.sort(key=lambda t: t[0], reverse=True)
-    return [j for _, j in scored[:top_k]]
+    ranked = [j for _, j in scored]
+    return ranked if top_k is None else ranked[:top_k]

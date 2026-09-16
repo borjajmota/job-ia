@@ -1,0 +1,29 @@
+name: CI - Tests y Lint
+
+# ubuntu-latest esta bien aqui: pytest/ruff no tocan LinkedIn, asi que no
+# aplica el motivo por el que daily.yml exige runner self-hosted.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instalar
+        run: pip install -e ".[dev]"
+
+      - name: Lint (ruff)
+        run: ruff check .
+
+      - name: Tests (pytest)
+        run: pytest -v

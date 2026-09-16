@@ -26,3 +26,16 @@ jobia = "jobia.cli:main"
 
 [tool.ruff]
 line-length = 100
+# v1_archivo/ es la v1 anterior, guardada solo de referencia -- no se
+# mantiene ni se lintea.
+extend-exclude = ["v1_archivo"]
+
+[tool.ruff.lint]
+ignore = [
+  "BLE001",  # except Exception amplio: deliberado en los bordes con Groq/SMTP/LinkedIn,
+             # servicios externos que pueden fallar de formas que no vale la pena enumerar.
+  "DTZ005",  # datetime.now() sin tz en scripts/gate0_linkedin.py (script de validacion
+             # historica, fuera de alcance tocarlo por esto).
+  "FURB162", # UP017 y FURB162: estilo, no correctitud -- no forman parte de lo pedido hoy.
+  "UP017",
+]

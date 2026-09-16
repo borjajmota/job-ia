@@ -11,6 +11,7 @@ CV a medida sobre una oferta concreta sin repetir la busqueda.
 from __future__ import annotations
 
 import os
+import sys
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import TypedDict
@@ -42,6 +43,7 @@ class GraphState(TypedDict, total=False):
     digest: list[dict]
     health: list[QueryHealth]
     blocked: bool
+    notes: list[str]
     report: RunReport
 
 
@@ -93,7 +95,34 @@ def fetch_jobs(state: GraphState) -> GraphState:
         except SourceBlocked as exc:
             blocked = True
             health.append(QueryHealth(query_id=q["id"], found=0, new=0, error=str(exc)))
-    return {"raw": raw, "health": health, "blocked": blocked}
+
+    notes = [] if blocked else _dead_query_notes(health)
+    return {"raw": raw, "health": health, "blocked": blocked, "notes": notes}
+
+
+def _dead_query_notes(health: list[QueryHealth]) -> list[str]:
+    """health.alert_query_dead_after_runs (rules.yaml): una query concreta
+    en 0 durante N corridas seguidas es distinta de "todas vacias hoy" --
+    no es bloqueo, pero probablemente el termino o el selector se rompio.
+    Antes esta config existia pero Store.consecutive_empty() nunca se
+    llamaba desde ningun sitio."""
+    rules_cfg = _load_yaml("config/rules.yaml")
+    n = rules_cfg.get("health", {}).get("alert_query_dead_after_runs")
+    if not n:
+        return []
+    store = Store(_db_path())
+    notes = []
+    for h in health:
+        if h.found != 0:
+            continue
+        # Las corridas ya persistidas cubren n-1; sumando la de hoy (0) son n.
+        prior_dead = n <= 1 or store.consecutive_empty(h.query_id, n - 1)
+        if prior_dead:
+            notes.append(
+                f"query '{h.query_id}' lleva {n} corridas seguidas en 0 resultados "
+                "-- revisa el termino o si el selector de LinkedIn cambio"
+            )
+    return notes
 
 
 def filter_new(state: GraphState) -> GraphState:
@@ -131,22 +160,39 @@ def rank_semantic(state: GraphState) -> GraphState:
 
 
 def enrich_details(state: GraphState) -> GraphState:
-    """Unico sitio del grafo donde se bajan descripciones completas, y solo
-    para las <=top_k del shortlist (invariante en CLAUDE.md)."""
+    """Unico sitio del grafo donde se bajan descripciones completas. Es el
+    punto que mas fuerte pega a LinkedIn (2026-09-16: sin tope de shortlist,
+    ver rules.yaml semantic.top_k), asi que un SourceBlocked aqui para el
+    bucle en el acto -- antes se tragaba por oferta y seguia intentando el
+    resto en silencio, justo el bug que la regla 1 de CLAUDE.md prohibe."""
     source = LinkedInSource(cache_dir=_cache_dir(), replay=_replay())
     enriched: list[Job] = []
+    blocked = False
     for j in state["shortlist"]:
+        if blocked:
+            enriched.append(j)
+            continue
         try:
             desc = source.fetch_description(j)
+            enriched.append(j.model_copy(update={"description": desc}))
         except SourceBlocked:
-            desc = None
-        enriched.append(j.model_copy(update={"description": desc}))
-    return {"shortlist": enriched}
+            blocked = True
+            enriched.append(j)
+    return {"shortlist": enriched, "blocked": blocked}
 
 
 def score_llm(state: GraphState) -> GraphState:
-    """L4: Groq, salida ScoredJob validada con pydantic."""
-    scored = scoring_pipeline.score(state["shortlist"], state["profile"]["scoring_guidance"])
+    """L4: Groq, salida ScoredJob validada con pydantic. Un fallo total
+    (Groq caido, key invalida) no debe tirar el grafo entero ni perder el
+    estado de dedupe que L1 ya comprometio -- se registra como nota y se
+    sigue con scored=[] (decide()/notify() ya saben tratar una lista vacia,
+    igual que un dia sin candidatas que pasen el umbral)."""
+    try:
+        scored = scoring_pipeline.score(state["shortlist"], state["profile"]["scoring_guidance"])
+    except Exception as exc:
+        note = f"L4 (Groq) fallo por completo, 0 ofertas puntuadas: {exc}"
+        print(f"score_llm: {note}", file=sys.stderr)
+        return {"scored": [], "notes": state.get("notes", []) + [note]}
     return {"scored": scored}
 
 
@@ -178,14 +224,29 @@ def decide(state: GraphState) -> GraphState:
 
 
 def notify(state: GraphState) -> GraphState:
+    """Un fallo de SMTP no debe tirar el grafo: si pasara, persist() no
+    llegaria a correr y el estado de dedupe que L1 ya comprometio (commit
+    temprano en Store.filter_new) se perderia en silencio sin haber
+    llegado nunca a puntuarse ni notificarse. Se registra como nota y se
+    sigue a persist() igual."""
     today = datetime.now(UTC).strftime("%Y-%m-%d")
     digest = state.get("digest", [])
-    if digest:
-        html = notify_email.render_digest(digest, today)
-        n = len(digest)
-        subject = f"job-ia · {today} · {n} oferta{'s' if n != 1 else ''}"
-        notify_email.send(html, subject=subject)
-    return {}
+    notes = list(state.get("notes", []))
+    try:
+        if digest:
+            html = notify_email.render_digest(digest, today, notes=notes)
+            n = len(digest)
+            subject = f"job-ia · {today} · {n} oferta{'s' if n != 1 else ''}"
+            notify_email.send(html, subject=subject)
+        elif notes:
+            # Dia sin ofertas que pasen el umbral pero con avisos (p.ej.
+            # una query muerta): antes esto se quedaba sin email, invisible
+            # salvo que alguien mirara la BD a mano.
+            html = notify_email.render_notice(notes, today)
+            notify_email.send(html, subject=f"job-ia · {today} · sin ofertas, con avisos")
+    except Exception as exc:
+        notes.append(f"fallo enviando email: {exc}")
+    return {"notes": notes}
 
 
 def persist(state: GraphState) -> GraphState:
@@ -204,6 +265,7 @@ def persist(state: GraphState) -> GraphState:
         n_emailed=len(state.get("digest", [])),
         threshold_used=state.get("threshold"),
         blocked=state.get("blocked", False),
+        notes=state.get("notes", []),
     )
     store.save_run(report)
     return {"report": report}
@@ -232,6 +294,14 @@ def route_after_fetch(state: GraphState) -> str:
     if state.get("raw") is not None and len(state["raw"]) == 0:
         return "alert_blocked"
     return "filter_new"
+
+
+def route_after_enrich(state: GraphState) -> str:
+    """Si enrich_details se bloqueo a mitad de las descripciones, no sigas
+    a score_llm con una mezcla de ofertas con y sin descripcion real."""
+    if state.get("blocked"):
+        return "alert_blocked"
+    return "score_llm"
 
 
 def build_graph(checkpointer=None):
@@ -263,7 +333,10 @@ def build_graph(checkpointer=None):
     g.add_edge("filter_new", "apply_rules")
     g.add_edge("apply_rules", "rank_semantic")
     g.add_edge("rank_semantic", "enrich_details")
-    g.add_edge("enrich_details", "score_llm")
+    g.add_conditional_edges(
+        "enrich_details", route_after_enrich,
+        {"score_llm": "score_llm", "alert_blocked": "alert_blocked"},
+    )
     g.add_edge("score_llm", "decide")
     g.add_edge("decide", "notify")
     g.add_edge("notify", "persist")

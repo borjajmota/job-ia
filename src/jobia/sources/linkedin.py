@@ -50,6 +50,7 @@ class LinkedInSource(JobSource):
         self.cache.mkdir(parents=True, exist_ok=True)
         self.replay = replay
         self._geo_id: str | None = None
+        self._searched_once = False
 
     # ---------------- geoId ----------------
     def geo_id(self, geo_query: str) -> str:
@@ -73,9 +74,19 @@ class LinkedInSource(JobSource):
 
     # ---------------- via principal ----------------
     def search(self, term, query_id, *, location, geo_query, hours_old, limit) -> list[Job]:
-        key = self.cache / f"search_{query_id}_{datetime.now():%Y%m%d}.json"
+        # UTC, no hora local: el resto del codebase (run_id, timestamps de
+        # BD) razona en UTC, y mezclar con hora local aqui podia desalinear
+        # la clave de cache justo en el borde del cambio de dia.
+        key = self.cache / f"search_{query_id}_{datetime.now(UTC):%Y%m%d}.json"
         if self.replay and key.exists():
             return [Job(**j) for j in json.loads(key.read_text(encoding="utf-8"))]
+
+        if self._searched_once:
+            # Pausa entre queries: antes no existia ninguna, y hoy son 10 al
+            # dia en vez de 5. No pausar aqui era la unica peticion en serie
+            # sin jitter de todo el modulo.
+            _pause()
+        self._searched_once = True
 
         try:
             jobs = self._via_jobspy(term, query_id, location, hours_old, limit)
@@ -166,15 +177,20 @@ class LinkedInSource(JobSource):
             return cached.read_text(encoding="utf-8")
         if self.replay:
             return None
-        r = http.get(f"{GUEST}/jobs/api/jobPosting/{job.job_id}", headers=HEADERS,
-                     timeout=30, **_IMP)
+        try:
+            r = http.get(f"{GUEST}/jobs/api/jobPosting/{job.job_id}", headers=HEADERS,
+                         timeout=30, **_IMP)
+        finally:
+            # La pausa va SIEMPRE, no solo tras un 200: antes, un bloqueo o
+            # un error disparaba la siguiente peticion sin esperar nada,
+            # justo cuando mas conviene frenar.
+            _pause()
         if r.status_code in BLOCK_CODES:
             raise SourceBlocked(f"HTTP {r.status_code} en descripcion {job.job_id}")
         if r.status_code != 200:
             return None
         text = BeautifulSoup(r.text, "html.parser").get_text(" ", strip=True)[:12000]
         cached.write_text(text, encoding="utf-8")
-        _pause()
         return text
 
 

@@ -23,13 +23,28 @@ con `[]` esta reintroduciendo el bug que mato a la v1. Usa `SourceBlocked`.
 8. `graph.py` — cablear los nodos. **Al final, no al principio.**
 
 ## Invariantes
-- Las descripciones completas se bajan **solo** en `enrich_details`, para <=20
-  ofertas. Bajarlas para 200 es lo que gana un bloqueo.
+- Las descripciones completas se bajan **solo** en `enrich_details`, para
+  todo lo que haya sobrevivido L2 -- sin tope fijo (decision del
+  2026-09-16: antes era <=20/<=18, pero eso descartaba en base al ranking
+  semantico de L3, que es la señal mas debil del embudo, tirando candidatas
+  buenas que R0-R6 en L2 ya habia validado). La seguridad ya no viene de un
+  numero pequeño: viene de que `enrich_details` para el bucle en el acto en
+  cuanto aparece un `SourceBlocked` (no sigue intentando el resto) y de que
+  L2 filtra mucho mas fuerte que antes. Si algun dia L2 deja pasar
+  cientos de ofertas de verdad, eso es señal de que L2 se rompio, no una
+  razon para bajar el tope otra vez sin mirar por que.
 - Todo lo que sale del LLM se valida con pydantic antes de tocar la BD.
-- `JOBIA_REPLAY=1` desarrolla contra la cache en disco. Usalo siempre que
-  iteres en L2/L3/L4: no hay razon para pegarle a LinkedIn 40 veces seguidas.
+- `JOBIA_REPLAY=1` desarrolla contra la cache en disco -- pero tambien
+  afecta a `enrich_details` (descripciones), no solo a la busqueda: si
+  necesitas descripciones reales de verdad con busqueda en cache, hazlo en
+  dos pasos (nodos por separado), no con el CLI de una sola pasada.
 - `JOBIA_DRY_RUN=1` imprime el email en consola en vez de enviarlo.
 - La BD vive fuera del repo. Nunca la commitees.
+- `jobia run` no corre dos veces el mismo dia si ya hubo una corrida sin
+  bloqueo (`Store.already_ran_today()`, guard en `cli.py`). `--force` lo
+  salta.
+- El checkpointer de LangGraph (`SqliteSaver`, cableado en `cli.py`) permite
+  reanudar una corrida cortada a mitad sin repetir las queries ya hechas.
 
 ## Estilo
 - Python 3.11+, type hints, pydantic v2, ruff (linea 100).

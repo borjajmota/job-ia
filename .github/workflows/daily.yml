@@ -10,7 +10,9 @@ jobs:
     # CRITICO: runner self-hosted. En ubuntu-latest la IP es de datacenter y
     # LinkedIn la bloquea: es exactamente lo que mato a la v1 de este proyecto.
     runs-on: [self-hosted, windows, jobia]
-    timeout-minutes: 30
+    # 30->60: sin tope en L3/enrich_details (2026-09-16), el volumen real
+    # depende de cuanto deje pasar L2 cada dia, no de un top_k fijo de 18.
+    timeout-minutes: 60
 
     steps:
       - uses: actions/checkout@v4
