@@ -17,55 +17,122 @@ from email.mime.text import MIMEText
 
 from jinja2 import BaseLoader, Environment, select_autoescape
 
-_DIGEST_TEMPLATE = """\
+_FONT = ("-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,"
+         "sans-serif")
+
+def _header(accent: str) -> str:
+    """Cabecera compartida: wordmark + fecha, misma tipografia en las tres
+    plantillas. Nada de flex -- una tabla de una fila, dos celdas. `accent`
+    se fija en Python al definir cada plantilla (no viaja como variable de
+    Jinja: aqui no hace falta y evita escapar llaves dos veces)."""
+    return f"""\
+<tr><td style="padding:0 6px 22px 6px;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+    <td style="font-size:13px;font-weight:700;letter-spacing:.06em;
+               color:{accent};text-transform:uppercase;font-family:{_FONT};">
+      job·ia
+    </td>
+    <td align="right" style="font-size:12px;color:#9c9a96;font-family:{_FONT};">
+      {{{{ today }}}}
+    </td>
+  </tr></table>
+</td></tr>"""
+
+_DIGEST_TEMPLATE = f"""\
 <!doctype html>
 <html lang="es">
-<body style="margin:0;padding:0;background:#f4f4f5;font-family:-apple-system,
-  Segoe UI,Roboto,Arial,sans-serif;color:#18181b;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
-         style="background:#f4f4f5;padding:24px 0;">
-    <tr><td align="center">
-      <table role="presentation" width="600" cellpadding="0" cellspacing="0"
-             style="background:#ffffff;border-radius:8px;overflow:hidden;">
-        <tr><td style="padding:24px 28px 8px 28px;">
-          <h1 style="margin:0;font-size:18px;">job-ia · {{ today }}</h1>
-          <p style="margin:4px 0 0 0;color:#71717a;font-size:13px;">
-            {{ n }} oferta{{ "s" if n != 1 else "" }} nueva{{ "s" if n != 1 else "" }}
-          </p>
-        </td></tr>
-        {% for j in jobs %}
-        <tr><td style="padding:16px 28px;border-top:1px solid #e4e4e7;">
-          <div style="display:flex;justify-content:space-between;align-items:baseline;">
-            <strong style="font-size:15px;">{{ j.title }}</strong>
-            <span style="font-size:13px;color:#71717a;">score {{ j.score }}</span>
-          </div>
-          <div style="font-size:13px;color:#52525b;margin-top:2px;">
-            {{ j.company }}{% if j.location %} · {{ j.location }}{% endif %}
-          </div>
-          {% if j.match %}
-          <ul style="margin:8px 0 0 0;padding-left:18px;font-size:13px;color:#27272a;">
-            {% for m in j.match[:2] %}<li>{{ m }}</li>{% endfor %}
-          </ul>
-          {% endif %}
-          {% if j.gaps %}
-          <div style="font-size:13px;color:#a16207;margin-top:6px;">
-            Gap: {{ j.gaps[0] }}
-          </div>
-          {% endif %}
-          {% if j.señal_roja %}
-          <div style="font-size:13px;color:#b91c1c;margin-top:6px;">
-            ⚠ {{ j.señal_roja }}
-          </div>
-          {% endif %}
-          <div style="margin-top:10px;">
-            <a href="{{ j.url }}" style="font-size:13px;color:#2563eb;
-               text-decoration:none;">Ver en LinkedIn →</a>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f6f5f3;font-family:{_FONT};">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;">
+    {{% if jobs %}}{{{{ jobs[0].title }}}}{{% if n > 1 %}} y {{{{ n - 1 }}}} mas{{% endif %}}{{% endif %}}
+  </div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f6f5f3;">
+    <tr><td align="center" style="padding:36px 16px;">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+        {_header("#141416")}
+        <tr><td style="padding:0 6px 22px 6px;">
+          <div style="font-size:21px;font-weight:600;color:#141416;letter-spacing:-.01em;font-family:{_FONT};">
+            {{{{ n }}}} oferta{{{{ "s" if n != 1 else "" }}}} nueva{{{{ "s" if n != 1 else "" }}}}
           </div>
         </td></tr>
-        {% endfor %}
-        <tr><td style="padding:16px 28px;border-top:1px solid #e4e4e7;
-                       font-size:11px;color:#a1a1aa;">
-          job-ia v2
+
+        {{% for j in jobs %}}
+        <tr><td style="padding-bottom:12px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+                 style="background:#ffffff;border:1px solid #e9e7e2;border-radius:14px;">
+            <tr><td style="padding:20px 22px;">
+
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+                <td style="font-size:16px;font-weight:600;color:#141416;line-height:1.4;font-family:{_FONT};">
+                  {{{{ j.title }}}}
+                </td>
+                <td align="right" valign="top" style="padding-left:14px;white-space:nowrap;">
+                  <span style="display:inline-block;background:#141416;color:#ffffff;font-family:{_FONT};
+                               font-size:12px;font-weight:700;padding:4px 11px;border-radius:100px;">
+                    {{{{ j.score }}}}
+                  </span>
+                </td>
+              </tr></table>
+
+              <div style="font-size:13px;color:#83817c;margin-top:4px;font-family:{_FONT};">
+                {{{{ j.company }}}}{{% if j.location %}} · {{{{ j.location }}}}{{% endif %}}
+              </div>
+
+              {{% if j.match %}}
+              <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:14px;">
+                {{% for m in j.match[:2] %}}
+                <tr><td style="font-size:13.5px;color:#141416;line-height:1.55;padding-top:3px;
+                               font-family:{_FONT};" width="18" valign="top">
+                  <span style="color:#188a4c;">✓</span>
+                </td><td style="font-size:13.5px;color:#3a393e;line-height:1.55;padding-top:3px;
+                                font-family:{_FONT};">{{{{ m }}}}</td></tr>
+                {{% endfor %}}
+              </table>
+              {{% endif %}}
+
+              {{% if j.gaps %}}
+              <div style="margin-top:12px;background:#fbf3e6;border-radius:9px;padding:9px 13px;">
+                <span style="font-size:10.5px;font-weight:700;letter-spacing:.05em;color:#9a6a12;
+                             text-transform:uppercase;font-family:{_FONT};">Gap</span>
+                <div style="font-size:13px;color:#7a5610;margin-top:2px;line-height:1.45;
+                            font-family:{_FONT};">{{{{ j.gaps[0] }}}}</div>
+              </div>
+              {{% endif %}}
+
+              {{% if j.señal_roja %}}
+              <div style="margin-top:8px;background:#fdf1f0;border-radius:9px;padding:9px 13px;">
+                <span style="font-size:10.5px;font-weight:700;letter-spacing:.05em;color:#b91c1c;
+                             text-transform:uppercase;font-family:{_FONT};">⚠ Señal roja</span>
+                <div style="font-size:13px;color:#9f1d1d;margin-top:2px;line-height:1.45;
+                            font-family:{_FONT};">{{{{ j.señal_roja }}}}</div>
+              </div>
+              {{% endif %}}
+
+              <div style="margin-top:17px;">
+                <a href="{{{{ j.url }}}}" style="display:inline-block;font-size:13px;font-weight:600;
+                   color:#ffffff;background:#141416;text-decoration:none;padding:9px 18px;
+                   border-radius:100px;font-family:{_FONT};">
+                  Ver oferta →
+                </a>
+              </div>
+
+            </td></tr>
+          </table>
+        </td></tr>
+        {{% endfor %}}
+
+        {{% if notes %}}
+        <tr><td style="padding:6px 6px 0 6px;">
+          {{% for note in notes %}}
+          <div style="font-size:12px;color:#9a6a12;margin-top:5px;font-family:{_FONT};">⚠ {{{{ note }}}}</div>
+          {{% endfor %}}
+        </td></tr>
+        {{% endif %}}
+
+        <tr><td style="padding:22px 6px 0 6px;border-top:1px solid #e9e7e2;margin-top:4px;">
+          <div style="font-size:11px;color:#adaba6;padding-top:16px;font-family:{_FONT};">
+            job-ia · corrida diaria
+          </div>
         </td></tr>
       </table>
     </td></tr>
@@ -74,28 +141,66 @@ _DIGEST_TEMPLATE = """\
 </html>
 """
 
-_ALERT_TEMPLATE = """\
+_NOTICE_TEMPLATE = f"""\
 <!doctype html>
 <html lang="es">
-<body style="margin:0;padding:0;background:#fef2f2;font-family:-apple-system,
-  Segoe UI,Roboto,Arial,sans-serif;color:#18181b;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
-         style="background:#fef2f2;padding:24px 0;">
-    <tr><td align="center">
-      <table role="presentation" width="600" cellpadding="0" cellspacing="0"
-             style="background:#ffffff;border-radius:8px;overflow:hidden;
-                    border:1px solid #fecaca;">
-        <tr><td style="padding:24px 28px;">
-          <h1 style="margin:0 0 8px 0;font-size:18px;color:#b91c1c;">
-            ⚠ job-ia · posible bloqueo · {{ today }}
-          </h1>
-          <p style="margin:0;font-size:14px;color:#3f3f46;">
-            Ninguna query devolvio resultados hoy. Una lista vacia nunca es
-            "no hay ofertas": es bloqueo hasta que se demuestre lo contrario.
-          </p>
-          <p style="margin:12px 0 0 0;font-size:13px;color:#71717a;">
-            Motivo registrado: {{ reason }}
-          </p>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f6f5f3;font-family:{_FONT};">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f6f5f3;">
+    <tr><td align="center" style="padding:36px 16px;">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+        {_header("#141416")}
+        <tr><td>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+                 style="background:#ffffff;border:1px solid #e9e7e2;border-radius:14px;">
+            <tr><td style="padding:22px 24px;">
+              <div style="font-size:15px;font-weight:600;color:#141416;font-family:{_FONT};">
+                Sin ofertas por encima del umbral hoy
+              </div>
+              <p style="margin:6px 0 12px 0;font-size:13px;color:#83817c;font-family:{_FONT};">
+                Pero hay avisos que conviene revisar:
+              </p>
+              {{% for note in notes %}}
+              <div style="font-size:13px;color:#9a6a12;margin-top:6px;line-height:1.5;
+                          font-family:{_FONT};">⚠ {{{{ note }}}}</div>
+              {{% endfor %}}
+            </td></tr>
+          </table>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>
+"""
+
+_ALERT_TEMPLATE = f"""\
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f6f5f3;font-family:{_FONT};">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f6f5f3;">
+    <tr><td align="center" style="padding:36px 16px;">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+        {_header("#b91c1c")}
+        <tr><td>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+                 style="background:#ffffff;border:1px solid #f3c9c4;border-radius:14px;">
+            <tr><td style="padding:22px 24px;">
+              <div style="font-size:15px;font-weight:700;color:#b91c1c;font-family:{_FONT};">
+                ⚠ Posible bloqueo de LinkedIn
+              </div>
+              <p style="margin:8px 0 0 0;font-size:13.5px;color:#3a393e;line-height:1.55;font-family:{_FONT};">
+                Ninguna query devolvio resultados hoy. Una lista vacia nunca es
+                "no hay ofertas": es bloqueo hasta que se demuestre lo contrario.
+              </p>
+              <div style="margin-top:14px;background:#fdf1f0;border-radius:9px;padding:9px 13px;">
+                <span style="font-size:10.5px;font-weight:700;letter-spacing:.05em;color:#b91c1c;
+                             text-transform:uppercase;font-family:{_FONT};">Motivo</span>
+                <div style="font-size:13px;color:#9f1d1d;margin-top:2px;font-family:{_FONT};">{{{{ reason }}}}</div>
+              </div>
+            </td></tr>
+          </table>
         </td></tr>
       </table>
     </td></tr>
@@ -107,12 +212,17 @@ _ALERT_TEMPLATE = """\
 _env = Environment(loader=BaseLoader(), autoescape=select_autoescape(["html"]))
 
 
-def render_digest(jobs: list[dict], today: str) -> str:
-    return _env.from_string(_DIGEST_TEMPLATE).render(jobs=jobs, today=today, n=len(jobs))
+def render_digest(jobs: list[dict], today: str, notes: list[str] | None = None) -> str:
+    return _env.from_string(_DIGEST_TEMPLATE).render(
+        jobs=jobs, today=today, n=len(jobs), notes=notes or [])
 
 
 def render_alert(reason: str, today: str) -> str:
     return _env.from_string(_ALERT_TEMPLATE).render(reason=reason, today=today)
+
+
+def render_notice(notes: list[str], today: str) -> str:
+    return _env.from_string(_NOTICE_TEMPLATE).render(notes=notes, today=today)
 
 
 def send(html: str, subject: str) -> None:
