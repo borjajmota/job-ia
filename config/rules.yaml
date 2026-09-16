@@ -1,37 +1,215 @@
 # --- L2: reglas duras. Deterministas, gratis, sin LLM. ---
-# Derivadas de hard_filters en profile.yaml.
+# title_rules implementa R0-R6 (analisis de journey manual + agente
+# independiente, 2026-09-16). KILL descarta antes de gastar nada en
+# embeddings o LLM. PASS/REVIEW siguen hacia L3/L4; la banda y el score
+# quedan en Job.flags como contexto para el juez del LLM.
+#
+# Decisiones tomadas al implementar (bandas R6 tenian un hueco 70-79 sin
+# clasificar en la propuesta original):
+#   - banda REVIEW ampliada a 45-79 (antes 45-69), PASS es >=80.
+#   - todo match usa limite de palabra (\b), no solo "ia"/"ml": "cto" no
+#     debe disparar dentro de "victory", "hr" no debe disparar dentro de
+#     cualquier palabra que lo contenga.
+#   - Adecco y Randstad añadidos al tier headhunter (-5): estaban en el
+#     exclude_companies antiguo como kill total: se degradan a penalizacion
+#     igual que el resto de agencias, en vez de perder esa cobertura.
+title_rules:
+  # R0 - se evaluan antes que cualquier KILL. Si el titulo matchea, se
+  # salta R1/R2/R3 (kills) y va directo a R4/R5 (empresa + score).
+  exceptions:
+    - "engineering manager"
+    - "engineering lead"
+    - "engineering director"
+    - "head of engineering"
+    - "data engineering manager"
+    - "data engineering lead"
+    - "ai engineering lead"
+    - "ai engineering manager"
+    - "technical program manager"
 
-exclude_title_regex:
-  - "(?i)\\b(junior|jr\\.?|becari|intern|trainee|practicas|pr[aá]cticas)\\b"
-  - "(?i)\\b(sales|ventas|comercial|account executive|teleoperador)\\b"
-  - "(?i)\\b(recruiter|talent acquisition|rrhh)\\b"
-  - "(?i)\\b(helpdesk|soporte t[eé]cnico|service desk|support engineer)\\b"
-  - "(?i)\\b(data scientist|machine learning scientist|research scientist)\\b"
-  - "(?i)\\b(bi (developer|analyst)|analista de bi|power bi developer)\\b"
+  # R1 - kill por credencial del puesto.
+  kill_credential:
+    no_incluir:  # si matchea, NO se evalua ningun bucket de R1 (falsos positivos conocidos)
+      - "deployment architect"
+      - "deployment strategist"
+    ventas_vendor:
+      - "pre-sales"
+      - "presales"
+      - "preventa"
+      - "sales engineer"
+      - "solutions engineer"
+      # unless_domain: "AI/Data Solutions Architect" es un arquetipo deseado
+      # (titles_of_interest en profile.yaml); el kill vendor solo aplica al
+      # "Solutions Architect" generico sin calificador de dominio.
+      - {term: "solutions architect", unless_domain: true}
+      - {term: "arquitecto de soluciones", unless_domain: true}
+      - "account executive"
+      - "account manager"
+      - "account director"
+      - "go-to-market"
+      - "gtm"
+      - "partner manager"
+      - "partner account"
+      - "alliance"
+      - "business development"
+      - "customer success"
+      - "sales"
+      - "comercial"
+    producto:
+      - "product manager"
+      - "product owner"
+      - "product lead"
+      - "product director"
+    consultoria:
+      - "consultant"
+      - "consultor"
+    ic_junior:
+      - "junior"
+      - "jr."
+      - "trainee"
+      - "intern"
+      - "becario"
+      - "graduate"
+      - "analyst"
+      - "analista"
+      - "developer"
+      - "desarrollador"
+      - "scientist"
+      - "cientifico"
+      - "qa"
+      - "tester"
+      - "support"
+      - "soporte"
+      - "administrator"
+    fuera_dominio:
+      - "people"
+      - "hr"
+      - "rrhh"
+      - "recruit"
+      - "talent"
+      - "marketing"
+      - "ecommerce"
+      - "seo"
+      - "growth"
+      - "helpdesk"
+      - "network engineer"
+      - "teleoperador"
 
-exclude_companies:
-  # ETTs y consultoras que republican la misma oferta a diario
-  - "Michael Page"
-  - "Hays"
-  - "Adecco"
-  - "Randstad"
-  - "Page Personnel"
+  # R2 - kill por nivel excesivo, solo si aparece al INICIO del titulo.
+  kill_seniority_excesivo:
+    terms:
+      - "chief * officer"   # patron: "chief <algo> officer"
+      - "cto"
+      - "cdo"
+      - "cio"
+      - "cdaio"
+      - "vp"
+      - "vice president"
+      - "managing director"
 
-require_any_in_title:
-  - data
-  - ia
-  - ai
-  - cloud
-  - architect
-  - arquitect
-  - platform
-  - plataforma
-  - lead
-  - head
-  - manager
-  - engineering
+  # R3 - relevancia: debe cumplirse (dominio Y seniority) O un arquetipo.
+  relevancia:
+    dominio:
+      - "ai"
+      - "artificial intelligence"
+      - "inteligencia artificial"
+      - "ia"
+      - "genai"
+      - "generative"
+      - "generativa"
+      - "llm"
+      - "machine learning"
+      - "ml"
+      - "mlops"
+      - "agentic"
+      - "data"
+      - "datos"
+      - "analytics"
+      - "cloud"
+      - "platform"
+      - "plataforma"
+      - "digital"
+      - "transformation"
+      - "transformacion"
+    seniority:
+      - "lead"
+      - "leader"
+      - "head"
+      - "manager"
+      - "responsable"
+      - "jefe"
+      - "director"
+      - "principal"
+      - "chapter"
+      - "staff"
+      - "architect"
+      - "arquitecto"
+    arquetipos:
+      - "head of engineering"
+      - "head of technology"
+      - "head of technical"
+      - "head of platform"
+      - "head of data"
+      - "head of ai"
+      - "engineering manager"
+      - "engineering lead"
+      - "engineering director"
+      - "chapter lead"
+      - "technical manager"
+      - "technical lead"
+      - "technical director"
 
-# Señal amarilla: no descarta, resta puntos en L4.
+  # R4 - clase de empresa. Primer tier que matchea gana (no se acumulan).
+  empresas:
+    # -35 mataba de raiz cualquier cosa de una consultora (base 60 - 35 = 25,
+    # por debajo de review_min incluso sin ningun otro problema): "AI
+    # Transformation Manager" en KPMG es justo un puesto real que se
+    # curó a mano y no debería morir solo por la marca. -15 sigue
+    # penalizando (empuja hacia REVIEW en vez de PASS) sin matar de oficio.
+    consultora:
+      penalty: -15
+      names: [kpmg, deloitte, pwc, ey, accenture, capgemini, everis, minsait,
+              indra, atos, "ntt data", sopra, globant, cognizant, infosys, tcs, wipro]
+    carnica:
+      kill: true
+      names: [exdesis, serem, knowmad, "grupo digital", babel, izertis, altia,
+              viewnext, inetum]
+    headhunter:
+      penalty: -5
+      names: ["michael page", hays, "page personnel", "robert walters", catenon,
+              "spring professional", antal, adecco, randstad]
+
+  # R5 - puntuacion, base 60. unless_domain: no se aplica si R3.dominio ya matcheo.
+  scoring:
+    base: 60
+    bonus:
+      - {match: ["data & ai", "data and ai"], points: 20}
+      - {match: ["genai", "generative", "agentic", "llm"], points: 15}
+      - {match: ["engineering manager", "engineering lead"], points: 15}
+      - {match: ["head of"], points: 12}
+      - {match: ["platform", "plataforma", "architecture", "architect", "arquitecto"], points: 10}
+      - {match: ["governance", "gobierno", "mlops", "infrastructure"], points: 10}
+      - {match: ["chapter lead", "team lead"], points: 10}
+      - {match: ["databricks", "snowflake", "gcp", "azure", "kubernetes"], points: 8}
+    penalty:
+      # -20 hundia "Service/Technical Delivery Manager" por debajo de
+      # review_min con solo esa penalizacion (60-20=40 < 45); -10 los deja
+      # en REVIEW para que L3/L4 decidan con la descripcion real.
+      - {match: ["delivery manager", "service manager"], points: -10, unless_domain: true}
+      - {match: ["digital transformation"], points: -15, unless_domain: true}
+      - {match: ["apac", "emea", "global", "multi-region"], points: -12}
+      - {match: ["especialista", "specialist"], points: -12}
+      - {match: ["program manager"], points: -8}
+      - {match: ["principal"], points: -8}
+      - {match: ["migration", "legacy"], points: -5}
+    # R6 - corte. Hueco 70-79 de la propuesta original cerrado hacia REVIEW.
+    bands:
+      pass_min: 80
+      review_min: 45   # [review_min, pass_min) -> REVIEW, [0, review_min) -> KILL
+
+# Señales amarillas independientes de R0-R6: no descartan, solo anotan
+# Job.flags para que L4 las tenga en cuenta (reporte a mando muy superior,
+# live coding challenge de produccion).
 yellow_flag_regex:
   - "(?i)\\b(cdaio|chief data.*officer|cto)\\b"
   - "(?i)\\b(live coding|technical challenge|pair programming session)\\b"

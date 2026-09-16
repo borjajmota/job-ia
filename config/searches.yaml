@@ -1,32 +1,44 @@
 # Consultas L0. Cada una se lanza por separado contra LinkedIn y se vigila
 # por separado: si una muere, lo sabras, en vez de diluirse en un total.
 #
-# Derivadas de semantic_anchors en profile.yaml. Terminos cortos: LinkedIn
-# castiga las consultas largas devolviendo casi nada.
+# 2026-09-16: se paso de 5 terminos compuestos a 10 terminos genericos de
+# una palabra (journey manual del usuario: buscar amplio y cribar despues,
+# en vez de intentar que la query ya venga precisa). La precision ahora la
+# ponen title_rules (R0-R6) en config/rules.yaml, no la query.
+#
+# max_results_per_query sube de 50 a 100, pero el volumen real lo sigue
+# acotando hours_old=24: en Madrid, en 24h, ningun termino de esta lista va
+# a agotar ese techo. No se deja sin limite (aunque se pidio) para no
+# depender de que jobspy pagine bien un "infinito".
 location: "Madrid, Community of Madrid, Spain"
 geo_query: "Madrid"
 hours_old: 24
-max_results_per_query: 50
+max_results_per_query: 100
 
 queries:
-  - id: data_ia
-    term: "data ia"
-    anchor: ai_solutions_architect
-  - id: engineering_manager
-    term: "engineering manager data"
-    anchor: engineering_manager_ia
-  - id: ai_architect
-    term: "ai architect"
-    anchor: ai_solutions_architect
-  - id: head_data_ai
-    term: "head of data ai"
-    anchor: data_ai_program_lead
-  - id: solutions_architect_cloud
-    term: "solutions architect cloud"
-    anchor: ai_solutions_architect
+  - id: ai
+    term: "AI"
+  - id: genai
+    term: "GenAI"
+  - id: llm
+    term: "LLM"
+  - id: data
+    term: "Data"
+  - id: data_platform
+    term: "Data Platform"
+  - id: agentic
+    term: "Agentic"
+  - id: machine_learning
+    term: "Machine Learning"
+  - id: mlops
+    term: "MLOps"
+  - id: ia
+    term: "IA"
+  - id: datos
+    term: "Datos"
 
 # Reserva: activar solo si las de arriba se secan. Mas queries = mas peticiones
-# = mas riesgo de bloqueo. Cinco al dia es un volumen razonable.
+# = mas riesgo de bloqueo.
 queries_backup:
   - id: forward_deployed
     term: "forward deployed engineer"
