@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: "0 7 * * 1-5"      # L-V 09:00 Madrid (Actions se retrasa, es normal)
   workflow_dispatch:
+    inputs:
+      force:
+        description: "Forzar otra corrida aunque ya haya habido una sin bloqueo hoy"
+        type: boolean
+        default: false
 
 jobs:
   run:
@@ -31,7 +36,12 @@ jobs:
           EMAIL_TO:           ${{ secrets.EMAIL_TO }}
           JOBIA_DB_PATH:      ${{ runner.workspace }}/jobia-state/jobia.db
           JOBIA_LLM_MODEL:    gemini-2.5-flash
-        run: .venv\Scripts\jobia run
+        run: |
+          if ('${{ github.event.inputs.force }}' -eq 'true') {
+            .venv\Scripts\jobia run --force
+          } else {
+            .venv\Scripts\jobia run
+          }
 
       # El estado vive FUERA del repo, en disco del runner. Nada de commitear
       # la base de datos en cada corrida.
