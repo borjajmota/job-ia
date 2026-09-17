@@ -64,9 +64,7 @@ con o sin guardar en `job_seen`) y configuracion de
 `searches.yaml`/`rules.yaml` (los valores simples; el arbol completo de
 `title_rules` R0-R6 sigue siendo solo de archivo).
 
-Sigue sin subirse a origin -- el usuario quiere probarlo primero y puede
-que cambie de Streamlit a otra cosa. No hacer push de este fichero ni de
-src/jobia/dashboard/ hasta que lo confirme.
+Subido a origin/main el 2026-09-17, confirmado por el usuario.
 
 ## Estilo
 - Python 3.11+, type hints, pydantic v2, ruff (linea 100).
