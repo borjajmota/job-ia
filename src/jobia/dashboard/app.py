@@ -52,6 +52,21 @@ def _runs_df(runs: list[RunReport]) -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------- Historial
+def _salud_banner(runs: list[RunReport]) -> None:
+    """Lo primero que se deberia ver al abrir el dashboard: si la ultima
+    corrida fue mal, o si hace demasiado que no corre ninguna, eso importa
+    mas que cualquier tabla."""
+    last = runs[0]
+    if last.blocked:
+        st.error(f"⚠ La última corrida ({last.run_id}) se marcó como **bloqueada**. "
+                  "Revisa el detalle antes de fiarte del resto de números.")
+    horas = (datetime.now(UTC) - last.started_at).total_seconds() / 3600
+    if horas > 36:
+        st.warning(f"La última corrida fue hace {horas:.0f}h ({last.run_id}). "
+                    "Si el cron es de lunes a viernes esto puede ser normal "
+                    "(fin de semana), pero conviene comprobarlo.")
+
+
 def page_historial(store: Store) -> None:
     st.header("Historial de corridas")
     runs = store.list_runs()
@@ -59,6 +74,7 @@ def page_historial(store: Store) -> None:
         st.info("Todavia no hay ninguna corrida registrada en esta base de datos.")
         return
 
+    _salud_banner(runs)
     df = _runs_df(runs)
     st.dataframe(df, width="stretch", hide_index=True)
 
@@ -119,12 +135,24 @@ def page_kpis(store: Store) -> None:
     st.subheader("Embudo (ultima corrida sin bloqueo)")
     last_ok = next((r for r in runs if not r.blocked), None)
     if last_ok:
+        col_chart, col_pct = st.columns([2, 1])
         funnel = pd.Series({
             "raw": last_ok.n_raw, "nuevas": last_ok.n_new,
             "tras L2": last_ok.n_after_rules, "puntuadas": last_ok.n_scored,
             "emailadas": last_ok.n_emailed,
         })
-        st.bar_chart(funnel)
+        with col_chart:
+            st.bar_chart(funnel)
+        with col_pct:
+            # El conteo absoluto no dice donde esta el cuello de botella
+            # real -- el % de caida entre pasos si.
+            def _pct(num, den):
+                return f"{100 * num / den:.0f}%" if den else "–"
+            st.markdown("**Conversion por paso**")
+            st.markdown(f"- raw → nuevas: {_pct(last_ok.n_new, last_ok.n_raw)}")
+            st.markdown(f"- nuevas → tras L2: {_pct(last_ok.n_after_rules, last_ok.n_new)}")
+            st.markdown(f"- tras L2 → puntuadas: {_pct(last_ok.n_scored, last_ok.n_after_rules)}")
+            st.markdown(f"- puntuadas → emailadas: {_pct(last_ok.n_emailed, last_ok.n_scored)}")
     else:
         st.caption("No hay ninguna corrida sin bloqueo todavia.")
 

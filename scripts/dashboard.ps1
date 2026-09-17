@@ -11,4 +11,8 @@
 $env:JOBIA_DB_PATH = "C:\actions-runner\_work\job-ia\jobia-state\jobia.db"
 $env:JOBIA_CHECKPOINT_PATH = "C:\actions-runner\_work\job-ia\jobia-state\checkpoints.db"
 
-streamlit run src/jobia/dashboard/app.py
+# Ruta directa al streamlit del venv: no depende de que esta sesion de
+# PowerShell tenga el venv activado (Activate.ps1 corrido a mano antes).
+$repoRoot = Split-Path -Parent $PSScriptRoot
+Set-Location $repoRoot  # .streamlit/config.toml (localhost-only) se busca en el cwd
+& "$repoRoot\.venv\Scripts\streamlit.exe" run "$repoRoot\src\jobia\dashboard\app.py" --server.address localhost --server.headless true
