@@ -24,12 +24,13 @@ jobs:
 
       - name: Ejecutar
         env:
+          GEMINI_API_KEY:     ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY:       ${{ secrets.GROQ_API_KEY }}
           GMAIL_USER:         ${{ secrets.GMAIL_USER }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           EMAIL_TO:           ${{ secrets.EMAIL_TO }}
           JOBIA_DB_PATH:      ${{ runner.workspace }}/jobia-state/jobia.db
-          JOBIA_LLM_MODEL:    openai/gpt-oss-120b
+          JOBIA_LLM_MODEL:    gemini-2.5-flash
         run: .venv\Scripts\jobia run
 
       # El estado vive FUERA del repo, en disco del runner. Nada de commitear

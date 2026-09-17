@@ -205,15 +205,20 @@ def enrich_details(state: GraphState) -> GraphState:
 
 
 def score_llm(state: GraphState) -> GraphState:
-    """L4: Groq, salida ScoredJob validada con pydantic. Un fallo total
-    (Groq caido, key invalida) no debe tirar el grafo entero ni perder el
-    estado de dedupe que L1 ya comprometio -- se registra como nota y se
-    sigue con scored=[] (decide()/notify() ya saben tratar una lista vacia,
-    igual que un dia sin candidatas que pasen el umbral)."""
+    """L4: Gemini con Groq de respaldo, salida ScoredJob validada con
+    pydantic. Un fallo total (ambos proveedores caidos, keys invalidas) no
+    debe tirar el grafo entero ni perder el estado de dedupe que L1 ya
+    comprometio -- se registra como nota y se sigue con scored=[]
+    (decide()/notify() ya saben tratar una lista vacia, igual que un dia
+    sin candidatas que pasen el umbral)."""
     try:
-        scored = scoring_pipeline.score(state["shortlist"], state["profile"]["scoring_guidance"])
+        store = Store(_db_path())
+        scored = scoring_pipeline.score(
+            state["shortlist"], state["profile"]["scoring_guidance"],
+            store=store, profile_version=state.get("profile_version", 0),
+        )
     except Exception as exc:
-        note = f"L4 (Groq) fallo por completo, 0 ofertas puntuadas: {exc}"
+        note = f"L4 (Gemini/Groq) fallo por completo, 0 ofertas puntuadas: {exc}"
         print(f"score_llm: {note}", file=sys.stderr)
         return {"scored": [], "notes": state.get("notes", []) + [note]}
     return {"scored": scored}

@@ -93,6 +93,14 @@ class Store:
         idx = int(len(vals) * percentile / 100)
         return max(floor, vals[min(idx, len(vals) - 1)])
 
+    def get_cached_score(self, job_id: str, profile_version: int) -> ScoredJob | None:
+        """Cache de L4: mismo job_id + misma profile_version ya puntuados
+        antes -- se reutiliza sin gastar cuota del LLM."""
+        row = self.db.execute(
+            "SELECT payload FROM scores WHERE job_id=? AND profile_version=?",
+            (job_id, profile_version)).fetchone()
+        return ScoredJob.model_validate_json(row["payload"]) if row else None
+
     def save_scores(self, run_id: str, pv: int, scored: list[ScoredJob]) -> None:
         now = datetime.now(UTC).isoformat()
         self.db.executemany(
