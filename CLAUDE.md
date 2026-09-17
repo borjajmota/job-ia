@@ -50,6 +50,24 @@ con `[]` esta reintroduciendo el bug que mato a la v1. Usa `SourceBlocked`.
   secrets llegan como variables de entorno reales, no hay `.env` en el
   checkout del runner).
 
+## Dashboard
+`pip install -e ".[dashboard]"` (streamlit/ruamel.yaml son un extra
+aparte: ni daily.yml ni ci.yml los necesitan, no tiene sentido pagar ese
+peso ahi). Luego `streamlit run src/jobia/dashboard/app.py` o
+`scripts/dashboard.ps1` (ya apunta `JOBIA_DB_PATH`/`JOBIA_CHECKPOINT_PATH`
+a la BD real del runner). Solo escucha en localhost
+(`.streamlit/config.toml`) -- no lo cambies sin querer exponerlo fuera de
+este PC. Historial de corridas (con aviso si la ultima se bloqueo o hace
+demasiado que no corre ninguna), KPIs (con % de conversion por paso, no
+solo el conteo absoluto), lanzar una corrida manual (ventana 24h/7d/30d,
+con o sin guardar en `job_seen`) y configuracion de
+`searches.yaml`/`rules.yaml` (los valores simples; el arbol completo de
+`title_rules` R0-R6 sigue siendo solo de archivo).
+
+Sigue sin subirse a origin -- el usuario quiere probarlo primero y puede
+que cambie de Streamlit a otra cosa. No hacer push de este fichero ni de
+src/jobia/dashboard/ hasta que lo confirme.
+
 ## Estilo
 - Python 3.11+, type hints, pydantic v2, ruff (linea 100).
 - Sin dependencias nuevas sin justificarlo en el PR.
