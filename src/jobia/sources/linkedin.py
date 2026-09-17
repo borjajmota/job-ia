@@ -155,8 +155,12 @@ class LinkedInSource(JobSource):
             urn = card.select_one("[data-entity-urn]")
             link = card.select_one("a.base-card__full-link, a[href*='/jobs/view/']")
             jid = None
-            if urn and (m := re.search(r"(\d{6,})", urn.get("data-entity-urn", ""))) or link and (m := re.search(r"-(\d{6,})", link.get("href", ""))):
-                jid = m.group(1)
+            if urn:
+                m = re.search(r"(\d{6,})", urn.get("data-entity-urn", ""))
+                jid = m.group(1) if m else None
+            if not jid and link:
+                m = re.search(r"-(\d{6,})", link.get("href", ""))
+                jid = m.group(1) if m else None
             title = card.select_one("h3, .base-search-card__title")
             company = card.select_one("h4 a, .base-search-card__subtitle") or card.select_one("h4")
             if not (jid and title and company):

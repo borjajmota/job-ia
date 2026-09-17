@@ -48,7 +48,8 @@ class GraphState(TypedDict, total=False):
     report: RunReport
     # Cableado para corridas manuales desde el dashboard (2026-09-17):
     run_type: str             # "scheduled" | "manual"
-    hours_old_override: int   # ventana de publicacion: 24 / 168 / 720
+    hours_old_override: int   # ventana de publicacion pedida: 24 / 168 / 720
+    hours_old_used: int       # la que realmente aplico plan_queries (para persist)
     save_to_dedupe: bool      # False = exploracion, no escribe en job_seen
 
 
@@ -80,7 +81,9 @@ def plan_queries(state: GraphState) -> GraphState:
     if state.get("hours_old_override"):
         common["hours_old"] = state["hours_old_override"]
     queries = [{"id": q["id"], "term": q["term"], **common} for q in cfg["queries"]]
-    return {"queries": queries}
+    # persist() lo guarda tal cual se uso, no un 24 hardcodeado que se
+    # desincroniza en cuanto cambie el hours_old por defecto de este yaml.
+    return {"queries": queries, "hours_old_used": common["hours_old"]}
 
 
 def fetch_jobs(state: GraphState) -> GraphState:
@@ -103,7 +106,12 @@ def fetch_jobs(state: GraphState) -> GraphState:
             blocked = True
             health.append(QueryHealth(query_id=q["id"], found=0, new=0, error=str(exc)))
 
-    notes = [] if blocked else _dead_query_notes(health)
+    # Solo para corridas programadas: una exploracion manual con ventana
+    # distinta (7d/30d) puede dar found=0 en una query por motivos que no
+    # tienen nada que ver con que el selector se haya roto, y ademas
+    # ensuciaria el streak de consecutive_empty que mira el cron diario.
+    is_scheduled = state.get("run_type", "scheduled") == "scheduled"
+    notes = [] if blocked or not is_scheduled else _dead_query_notes(health)
     return {"raw": raw, "health": health, "blocked": blocked, "notes": notes}
 
 
@@ -112,7 +120,15 @@ def _dead_query_notes(health: list[QueryHealth]) -> list[str]:
     en 0 durante N corridas seguidas es distinta de "todas vacias hoy" --
     no es bloqueo, pero probablemente el termino o el selector se rompio.
     Antes esta config existia pero Store.consecutive_empty() nunca se
-    llamaba desde ningun sitio."""
+    llamaba desde ningun sitio.
+
+    Limitacion conocida: query_health no distingue scheduled/manual (no hay
+    columna run_type; anadirla es migracion de esquema, no se ha hecho).
+    Solo se llama a esta funcion para corridas scheduled (ver fetch_jobs),
+    pero si una corrida manual encuentra 0 en una query, esa fila igual
+    cuenta dentro de la ventana de N corridas que mira consecutive_empty
+    la proxima vez. Poco probable y no critico (es solo un aviso, no un
+    bloqueo), pero es una contaminacion real, no una duda teorica."""
     rules_cfg = _load_yaml("config/rules.yaml")
     n = rules_cfg.get("health", {}).get("alert_query_dead_after_runs")
     if not n:
@@ -270,7 +286,7 @@ def persist(state: GraphState) -> GraphState:
         finished_at=datetime.now(UTC),
         profile_version=state.get("profile_version", 0),
         run_type=state.get("run_type", "scheduled"),
-        hours_old=state.get("hours_old_override") or 24,
+        hours_old=state.get("hours_old_used", 24),
         saved_to_dedupe=state.get("save_to_dedupe", True),
         queries=state.get("health", []),
         n_raw=len(state.get("raw", [])),

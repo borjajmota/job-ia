@@ -16,12 +16,15 @@ dependencies = [
   "jinja2>=3.1",
   "groq>=0.11",
   "rich>=13.7",
-  "streamlit>=1.38",
-  "ruamel.yaml>=0.18",
 ]
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff>=0.6"]
+# Solo para el dashboard local (src/jobia/dashboard/): ni daily.yml ni
+# ci.yml lo tocan, y streamlit arrastra pandas/pyarrow/altair -- meterlo en
+# dependencies obligaba a instalarlo tambien en el runner de produccion y
+# en cada corrida de CI, sin usarlo nunca ahi.
+dashboard = ["streamlit>=1.38", "ruamel.yaml>=0.18"]
 
 [project.scripts]
 jobia = "jobia.cli:main"

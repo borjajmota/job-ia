@@ -5,8 +5,8 @@ Una oferta puntua por su MEJOR ancla, no por el promedio: asi un match fuerte
 en una sola linea del perfil no se diluye con las otras cuatro (aggregation:
 max en config/rules.yaml).
 
-Sin descripcion todavia: eso solo se baja en enrich_details, para <=20
-ofertas. Aqui se compara contra titulo + empresa.
+Sin descripcion todavia: eso solo se baja en enrich_details, para lo que
+sobreviva L2. Aqui se compara contra titulo + empresa.
 """
 from __future__ import annotations
 

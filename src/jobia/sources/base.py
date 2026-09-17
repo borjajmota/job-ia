@@ -25,4 +25,5 @@ class JobSource(ABC):
 
     @abstractmethod
     def fetch_description(self, job: Job) -> str | None:
-        """Solo se llama en la frontera L3->L4, para <=20 ofertas al dia."""
+        """Solo se llama en la frontera L3->L4, para lo que haya sobrevivido
+        L2 (sin tope fijo desde 2026-09-16, ver rules.yaml semantic.top_k)."""

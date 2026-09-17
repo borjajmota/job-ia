@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import re
 import unicodedata
+from functools import lru_cache
 from pathlib import Path
 
 import yaml
@@ -30,7 +31,13 @@ def load_rules(path: str | Path = "config/rules.yaml") -> dict:
     return yaml.safe_load(Path(path).read_text(encoding="utf-8"))
 
 
+@lru_cache(maxsize=2048)
 def _normalize(text: str) -> str:
+    # Los terminos de las reglas (listas de rules.yaml) se renormalizan una
+    # y otra vez, iguales, por cada oferta evaluada -- con cientos de
+    # ofertas por corrida (sin tope desde 2026-09-16) eso es trabajo
+    # repetido de verdad. maxsize acotado porque tambien pasan titulos de
+    # ofertas reales, que sí varian.
     text = unicodedata.normalize("NFKD", text or "")
     text = "".join(c for c in text if not unicodedata.combining(c))
     text = text.lower()

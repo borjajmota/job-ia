@@ -1,8 +1,8 @@
 """L4: juez LLM sobre Groq (tier gratuito). Unico nivel que cuesta algo y el
 unico que ve descripciones completas -- ya bajadas en enrich_details, para
-<=20 ofertas. Todo lo que devuelve el LLM se valida con ScoredJob antes de
-tocar la BD: si el parseo o la validacion fallan, esa oferta se omite, nunca
-se inventa un score.
+lo que haya sobrevivido L2 (sin tope fijo desde 2026-09-16). Todo lo que
+devuelve el LLM se valida con ScoredJob antes de tocar la BD: si el parseo
+o la validacion fallan, esa oferta se omite, nunca se inventa un score.
 """
 from __future__ import annotations
 
