@@ -193,7 +193,7 @@ class LinkedInSource(JobSource):
             raise SourceBlocked(f"HTTP {r.status_code} en descripcion {job.job_id}")
         if r.status_code != 200:
             return None
-        text = BeautifulSoup(r.text, "html.parser").get_text(" ", strip=True)[:12000]
+        text = BeautifulSoup(r.text, "html.parser").get_text(" ", strip=True)[:4000]
         cached.write_text(text, encoding="utf-8")
         return text
 
