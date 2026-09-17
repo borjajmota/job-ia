@@ -20,7 +20,7 @@ from jobia.models import Job, ScoredJob
 if TYPE_CHECKING:
     from jobia.store import Store
 
-DEFAULT_MODEL = "gemini-2.5-flash"
+DEFAULT_MODEL = "gemini-3.6-flash"
 # Groq de respaldo: modelo fijo, no configurable via JOBIA_LLM_MODEL --
 # esa variable pilota el modelo de Gemini (el principal), y mezclar ambos
 # en el mismo env var mandaria nombres de modelo de un proveedor al otro.

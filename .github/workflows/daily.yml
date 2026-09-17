@@ -35,7 +35,7 @@ jobs:
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           EMAIL_TO:           ${{ secrets.EMAIL_TO }}
           JOBIA_DB_PATH:      ${{ runner.workspace }}/jobia-state/jobia.db
-          JOBIA_LLM_MODEL:    gemini-2.5-flash
+          JOBIA_LLM_MODEL:    gemini-3.6-flash
         run: |
           if ('${{ github.event.inputs.force }}' -eq 'true') {
             .venv\Scripts\jobia run --force
